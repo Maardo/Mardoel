@@ -1,0 +1,4 @@
+project_id = "nawkzvgxafaxdwfpqlts"
+
+[functions.fetch-nordpool-prices]
+verify_jwt = false

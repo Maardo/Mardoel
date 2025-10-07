@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  generateMockPriceData,
+  fetchPriceData,
   getCheapestHours,
   getExpensiveHours,
   findCheapestWindow,
@@ -16,29 +16,49 @@ import LastUpdated from "@/components/LastUpdated";
 import { Zap } from "lucide-react";
 
 const Index = () => {
-  const [priceData, setPriceData] = useState<PriceData>(generateMockPriceData());
+  const [priceData, setPriceData] = useState<PriceData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [optimalWindow, setOptimalWindow] = useState<{
     startHour: number;
     endHour: number;
-  }>(findCheapestWindow(generateMockPriceData().today, 2));
+  } | null>(null);
 
   const currentHour = new Date().getHours();
-  const cheapHours = getCheapestHours(priceData.today);
-  const expensiveHours = getExpensiveHours(priceData.today);
+  const cheapHours = priceData ? getCheapestHours(priceData.today) : [];
+  const expensiveHours = priceData ? getExpensiveHours(priceData.today) : [];
 
-  const handleRefresh = () => {
-    const newData = generateMockPriceData();
-    setPriceData(newData);
+  const loadPrices = async () => {
+    setLoading(true);
+    const data = await fetchPriceData();
+    setPriceData(data);
+    setOptimalWindow(findCheapestWindow(data.today, 2));
+    setLoading(false);
   };
+
+  // Initial load
+  useEffect(() => {
+    loadPrices();
+  }, []);
 
   // Auto-refresh every hour
   useEffect(() => {
     const interval = setInterval(() => {
-      handleRefresh();
+      loadPrices();
     }, 3600000); // 1 hour
 
     return () => clearInterval(interval);
   }, []);
+
+  if (loading || !priceData) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Zap className="w-12 h-12 animate-pulse mx-auto mb-4 text-primary" />
+          <p className="text-lg text-muted-foreground">Laddar elpriser...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,7 +82,7 @@ const Index = () => {
 
         {/* Last Updated */}
         <div className="mb-6">
-          <LastUpdated lastUpdated={priceData.lastUpdated} onRefresh={handleRefresh} />
+          <LastUpdated lastUpdated={priceData.lastUpdated} onRefresh={loadPrices} />
         </div>
 
         {/* Legend */}
@@ -122,34 +142,13 @@ const Index = () => {
           />
         </div>
 
-        {/* API Integration Instructions */}
-        <div className="mt-8 bg-muted rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-foreground mb-3">
-            Integration med Node.js Backend
-          </h3>
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <p>
-              För att koppla mot live-data från Nord Pool, ersätt <code className="bg-background px-2 py-1 rounded">generateMockPriceData()</code> med ett fetch-anrop till din Node.js-proxy:
-            </p>
-            <pre className="bg-background p-3 rounded overflow-x-auto mt-2">
-{`// I utils/priceUtils.ts
-export const fetchPriceData = async (): Promise<PriceData> => {
-  const response = await fetch('/api/prices/se3');
-  return await response.json();
-};`}
-            </pre>
-            <p className="mt-2">
-              Backend-proxy bör returnera samma format som <code className="bg-background px-2 py-1 rounded">PriceData</code> interfacet.
-            </p>
-          </div>
-        </div>
       </main>
 
       {/* Footer */}
       <footer className="bg-card border-t border-border mt-12 py-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <p>
-            Data är mockad för demo. Koppla till Nord Pool API via Node.js-proxy för live-priser.
+            Live-priser från Nord Pool via Lovable Cloud. Data uppdateras automatiskt varje timme.
           </p>
         </div>
       </footer>

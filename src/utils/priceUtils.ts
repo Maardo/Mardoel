@@ -1,4 +1,5 @@
 // Utility functions for electricity price calculations and data handling
+import { supabase } from "@/integrations/supabase/client";
 
 export interface HourlyPrice {
   hour: number;
@@ -13,6 +14,27 @@ export interface PriceData {
 }
 
 // Mock data generator - replace with actual API call to Node.js proxy
+// Fetch live price data from backend
+export const fetchPriceData = async (): Promise<PriceData> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('fetch-nordpool-prices');
+    
+    if (error) {
+      console.error('Error fetching prices:', error);
+      throw error;
+    }
+    
+    return {
+      today: data.today,
+      yesterday: data.yesterday,
+      lastUpdated: data.lastUpdated,
+    };
+  } catch (error) {
+    console.error('Failed to fetch live prices, using mock data:', error);
+    return generateMockPriceData();
+  }
+};
+
 export const generateMockPriceData = (): PriceData => {
   const now = new Date();
   const today = Array.from({ length: 24 }, (_, i) => ({
