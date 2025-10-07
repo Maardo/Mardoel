@@ -47,16 +47,25 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+        price: {
+          cheap: "hsl(var(--price-cheap))",
+          "cheap-foreground": "hsl(var(--price-cheap-foreground))",
+          expensive: "hsl(var(--price-expensive))",
+          "expensive-foreground": "hsl(var(--price-expensive-foreground))",
+          optimal: "hsl(var(--price-optimal))",
+          "optimal-foreground": "hsl(var(--price-optimal-foreground))",
         },
+      },
+      backgroundImage: {
+        "gradient-hero": "var(--gradient-hero)",
+        "gradient-card": "var(--gradient-card)",
+      },
+      boxShadow: {
+        elegant: "var(--shadow-elegant)",
+        card: "var(--shadow-card)",
+      },
+      transitionProperty: {
+        smooth: "var(--transition-smooth)",
       },
       borderRadius: {
         lg: "var(--radius)",
