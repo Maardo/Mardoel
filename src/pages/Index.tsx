@@ -110,8 +110,8 @@ const Index = () => {
           />
         </div>
 
-        {/* Price Tables */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Price Table */}
+        <div className="mb-6">
           <PriceTable
             prices={priceData.today}
             title="Dagens priser"
@@ -119,10 +119,6 @@ const Index = () => {
             expensiveHours={expensiveHours}
             optimalWindow={optimalWindow}
             currentHour={currentHour}
-          />
-          <PriceTable
-            prices={priceData.yesterday}
-            title="Gårdagens priser"
           />
         </div>
 

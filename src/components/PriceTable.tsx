@@ -33,14 +33,14 @@ const PriceTable = ({
   };
 
   return (
-    <div className="bg-card rounded-lg shadow-card p-6">
-      <h3 className="text-lg font-semibold mb-4 text-foreground">{title}</h3>
+    <div className="bg-card rounded-lg shadow-card p-6 border border-border">
+      <h3 className="text-xl font-bold mb-6 text-foreground">{title}</h3>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full">
           <thead>
-            <tr className="border-b border-border">
-              <th className="text-left py-2 px-3 font-medium text-muted-foreground">Timme</th>
-              <th className="text-right py-2 px-3 font-medium text-muted-foreground">Pris</th>
+            <tr className="border-b-2 border-border">
+              <th className="text-left py-4 px-4 font-bold text-base text-foreground uppercase tracking-wide">Timme</th>
+              <th className="text-right py-4 px-4 font-bold text-base text-foreground uppercase tracking-wide">Pris (kr/kWh)</th>
             </tr>
           </thead>
           <tbody>
@@ -48,18 +48,18 @@ const PriceTable = ({
               <tr
                 key={price.hour}
                 className={cn(
-                  "border-b border-border/50 transition-colors",
+                  "border-b border-border transition-all duration-200 hover:shadow-sm",
                   getRowClass(price.hour),
-                  currentHour === price.hour && "ring-2 ring-primary animate-pulse"
+                  currentHour === price.hour && "ring-4 ring-primary/50 shadow-lg"
                 )}
               >
-                <td className="py-2 px-3 font-medium">
+                <td className="py-3.5 px-4 font-semibold text-base">
                   {formatHour(price.hour)}
                   {currentHour === price.hour && (
-                    <span className="ml-2 text-xs font-semibold">(Nu)</span>
+                    <span className="ml-2 text-sm font-bold uppercase">(Nu)</span>
                   )}
                 </td>
-                <td className="text-right py-2 px-3 font-semibold">
+                <td className="text-right py-3.5 px-4 font-bold text-lg">
                   {formatPrice(price.price)}
                 </td>
               </tr>
