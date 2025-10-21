@@ -1,19 +1,16 @@
 import { useState, useEffect } from "react";
 import {
   fetchPriceData,
-  getCheapestHours,
-  getExpensiveHours,
   findCheapestWindow,
   PriceData,
+  createRolling24HourView,
 } from "@/utils/priceUtils";
-import PriceTable from "@/components/PriceTable";
 import PriceChart from "@/components/PriceChart";
-
 import PriceNotification from "@/components/PriceNotification";
 import HeroSection from "@/components/HeroSection";
 import CostCards from "@/components/CostCards";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Zap } from "lucide-react";
+import { Zap, Info } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Index = () => {
   const [priceData, setPriceData] = useState<PriceData | null>(null);
@@ -26,43 +23,31 @@ const Index = () => {
   const [selectedHourWindow, setSelectedHourWindow] = useState<number | null>(null);
 
   const currentHour = new Date().getHours();
-  const cheapHours = priceData ? getCheapestHours(priceData.today) : [];
-  const expensiveHours = priceData ? getExpensiveHours(priceData.today) : [];
+  
+  // Create rolling 24-hour view
+  const rolling24Hours = priceData 
+    ? createRolling24HourView(priceData.today, priceData.tomorrow, currentHour)
+    : [];
 
-  // Calculate selected window and hours for both charts
-  const selectedWindowData = selectedHourWindow && priceData?.tomorrow
-    ? (() => {
-        const { findCheapestWindowAcrossDays } = require("@/utils/priceUtils");
-        const window = findCheapestWindowAcrossDays(priceData.today, priceData.tomorrow, selectedHourWindow);
-        
-        // Determine which hours belong to today and which to tomorrow
-        const todayHours: number[] = [];
-        const tomorrowHours: number[] = [];
-        
-        for (let i = 0; i < selectedHourWindow; i++) {
-          const hour = window.startHour + i;
-          if (hour < 24) {
-            todayHours.push(hour);
-          } else {
-            tomorrowHours.push(hour - 24); // Normalize back to 0-23
-          }
-        }
-        
-        return { window, todayHours, tomorrowHours };
-      })()
-    : selectedHourWindow && priceData
-    ? (() => {
-        const window = findCheapestWindow(priceData.today, selectedHourWindow);
-        const todayHours = Array.from({ length: selectedHourWindow }, (_, i) => window.startHour + i);
-        return { window: { ...window, spansToNextDay: false }, todayHours, tomorrowHours: [] };
-      })()
+  // Calculate optimal window for the rolling view
+  const cheapest4Window = rolling24Hours.length > 0 
+    ? findCheapestWindow(rolling24Hours, 4)
+    : null;
+
+  // Calculate selected window
+  const selectedWindow = selectedHourWindow && rolling24Hours.length > 0
+    ? findCheapestWindow(rolling24Hours, selectedHourWindow)
     : null;
 
   const loadPrices = async () => {
     setLoading(true);
     const data = await fetchPriceData();
     setPriceData(data);
-    setOptimalWindow(findCheapestWindow(data.today, 4)); // 4-hour window
+    
+    // Calculate optimal window for hero section (today only)
+    const todayOptimal = findCheapestWindow(data.today, 4);
+    setOptimalWindow(todayOptimal);
+    
     setLoading(false);
   };
 
@@ -122,65 +107,25 @@ const Index = () => {
         {/* Cost Cards */}
         <CostCards prices={priceData.today} />
 
-        {/* Tabs */}
-        <Tabs defaultValue="overview" className="w-full">
-          <div className="flex flex-col gap-3 mb-6">
-            <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 gap-3 h-auto bg-transparent">
-              <TabsTrigger 
-                value="overview" 
-                className="text-base sm:text-lg h-12 border-2 border-border data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-md"
-              >
-                Översikt
-              </TabsTrigger>
-              <TabsTrigger 
-                value="tomorrow" 
-                className="text-base sm:text-lg h-12 border-2 border-border data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-md"
-              >
-                Morgondagens priser
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <PriceChart
-              todayPrices={priceData.today}
-              yesterdayPrices={priceData.yesterday}
-              tomorrowPrices={priceData.tomorrow}
-              optimalWindow={optimalWindow}
-              date={new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
-              selectedHourWindow={selectedHourWindow}
-              onSelectedHourWindowChange={setSelectedHourWindow}
-              selectedWindowHours={selectedWindowData?.todayHours || []}
-              selectedWindow={selectedWindowData?.window}
-            />
-            
-          </TabsContent>
-
-          {/* Tomorrow Tab */}
-          <TabsContent value="tomorrow" className="space-y-6">
-            {priceData.tomorrow && priceData.tomorrow.length > 0 ? (
-              <PriceChart
-                todayPrices={priceData.tomorrow}
-                yesterdayPrices={priceData.today}
-                tomorrowPrices={undefined}
-                optimalWindow={findCheapestWindow(priceData.tomorrow, 4)}
-                title="Prisutveckling imorgon"
-                date={new Date(new Date().setDate(new Date().getDate() + 1)).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
-                selectedHourWindow={selectedHourWindow}
-                onSelectedHourWindowChange={setSelectedHourWindow}
-                selectedWindowHours={selectedWindowData?.tomorrowHours || []}
-                selectedWindow={selectedWindowData?.window}
-              />
-            ) : (
-              <div className="bg-card rounded-lg shadow-card p-8 border border-border text-center">
-                <p className="text-muted-foreground">
-                  Morgondagens priser är inte tillgängliga än. De publiceras vanligtvis runt kl 13:00.
-                </p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+        {/* Rolling 24-Hour Price Chart */}
+        {rolling24Hours.length > 0 ? (
+          <PriceChart
+            rollingPrices={rolling24Hours}
+            optimalWindow={cheapest4Window}
+            selectedHourWindow={selectedHourWindow}
+            onSelectedHourWindowChange={setSelectedHourWindow}
+            selectedWindow={selectedWindow}
+            currentHour={currentHour}
+          />
+        ) : (
+          <Alert className="mb-6">
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              Kompletta 24-timmars priser visas efter kl 13:00 när morgondagens priser publiceras.
+              För tillfället visas endast dagens återstående timmar.
+            </AlertDescription>
+          </Alert>
+        )}
       </main>
 
       {/* Footer */}

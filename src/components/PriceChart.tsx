@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { HourlyPrice, findCheapestWindow } from "@/utils/priceUtils";
-import { formatHour } from "@/utils/priceUtils";
+import { Rolling24HourPrice, findCheapestWindow } from "@/utils/priceUtils";
 import { Button } from "@/components/ui/button";
 import {
   BarChart,
@@ -15,78 +14,72 @@ import {
 } from "recharts";
 
 interface PriceChartProps {
-  todayPrices: HourlyPrice[];
-  yesterdayPrices: HourlyPrice[];
-  tomorrowPrices?: HourlyPrice[];
-  optimalWindow?: { startHour: number; endHour: number; avgPrice: number };
-  title?: string;
-  date?: string;
+  rollingPrices: Rolling24HourPrice[];
+  optimalWindow?: { startHour: number; endHour: number; avgPrice: number } | null;
   selectedHourWindow?: number | null;
   onSelectedHourWindowChange?: (hours: number | null) => void;
-  selectedWindowHours?: number[];
-  selectedWindow?: { startHour: number; endHour: number; avgPrice: number; spansToNextDay?: boolean };
+  selectedWindow?: { startHour: number; endHour: number; avgPrice: number } | null;
+  currentHour: number;
 }
 
 const PriceChart = ({ 
-  todayPrices, 
-  yesterdayPrices, 
-  tomorrowPrices, 
+  rollingPrices,
   optimalWindow, 
-  title = "Prisutveckling idag", 
-  date,
   selectedHourWindow,
   onSelectedHourWindowChange,
-  selectedWindowHours = [],
-  selectedWindow
+  selectedWindow,
+  currentHour
 }: PriceChartProps) => {
   const [selectedHours, setSelectedHours] = useState<number[]>([]);
 
-  // Get the 4 cheapest consecutive hours (static green)
-  const cheapestWindow = findCheapestWindow(todayPrices, 4);
-  const cheapest4Hours = Array.from(
-    { length: 4 }, 
-    (_, i) => (cheapestWindow.startHour + i) % 24 // Handle wrap-around at midnight
-  );
+  // Calculate the 4 cheapest consecutive hours
+  const cheapest4Indices = optimalWindow 
+    ? Array.from({ length: 4 }, (_, i) => {
+        const hour = (optimalWindow.startHour + i) % rollingPrices.length;
+        return hour;
+      })
+    : [];
+
+  // Calculate selected window indices
+  const selectedWindowIndices = selectedWindow
+    ? Array.from({ length: selectedHourWindow || 0 }, (_, i) => {
+        const hour = (selectedWindow.startHour + i) % rollingPrices.length;
+        return hour;
+      })
+    : [];
   
-  // Calculate average price for selected window hours
+  // Calculate average price for selected window
   const avgSelectedWindow = selectedWindow ? selectedWindow.avgPrice / 100 : null;
 
-  // Average price for the 4 cheapest consecutive hours (convert from öre to kr)
-  const avgCheapest4 = cheapestWindow.avgPrice / 100;
+  // Average price for the 4 cheapest consecutive hours
+  const avgCheapest4 = optimalWindow ? optimalWindow.avgPrice / 100 : 0;
 
-  // Calculate average price for today
-  const avgTodayPrice = todayPrices.reduce((sum, p) => sum + p.price, 0) / todayPrices.length / 100;
+  // Calculate average price for the rolling 24 hours
+  const avgRollingPrice = rollingPrices.length > 0
+    ? rollingPrices.reduce((sum, p) => sum + p.price, 0) / rollingPrices.length / 100
+    : 0;
 
-  // Calculate average price for selected hours (use the prices being displayed)
+  // Calculate average price for manually selected hours
   const avgSelectedPrice = selectedHours.length > 0
-    ? todayPrices
-        .filter(p => selectedHours.includes(p.hour))
+    ? rollingPrices
+        .filter((_, idx) => selectedHours.includes(idx))
         .reduce((sum, p) => sum + p.price, 0) / selectedHours.length / 100
     : null;
 
-  // Debug logging
-  if (selectedHours.length > 0) {
-    console.log('Selected hours:', selectedHours);
-    console.log('Prices for selected hours:', todayPrices.filter(p => selectedHours.includes(p.hour)));
-    console.log('Average:', avgSelectedPrice);
-  }
+  // Prepare chart data
+  const chartData = rollingPrices.map((hourData, idx) => ({
+    hour: hourData.displayHour,
+    hourNum: idx,
+    pris: hourData.price / 100,
+    isCheap: cheapest4Indices.includes(idx),
+    isSelectedWindow: selectedWindowIndices.includes(idx),
+    isSelected: selectedHours.includes(idx),
+    isNextDay: hourData.isNextDay
+  }));
 
-  // Combine data for chart - ensure we have exactly 24 hours (0-23)
-  const chartData = Array.from({ length: 24 }, (_, i) => {
-    const hourData = todayPrices.find(p => p.hour === i);
-    return {
-      hour: `${i.toString().padStart(2, '0')}:00`,
-      hourNum: i,
-      pris: hourData ? hourData.price / 100 : 0,
-      isCheap: hourData && cheapest4Hours.includes(i), // 4 cheapest consecutive hours (green)
-      isSelectedWindow: hourData && selectedWindowHours.includes(i), // Selected charging window from parent (red)
-      isSelected: selectedHours.includes(i), // Manually selected (orange)
-    };
-  });
-
-  // Handle bar click - disable manual selection when a window is selected
+  // Handle bar click
   const handleBarClick = (data: any) => {
-    if (selectedHourWindow) return; // Don't allow manual selection when a window is active
+    if (selectedHourWindow) return;
     
     const hourNum = data.hourNum;
     setSelectedHours(prev => 
@@ -109,7 +102,10 @@ const PriceChart = ({
       const data = payload[0].payload;
       return (
         <div className="bg-card border border-border rounded-lg p-3 shadow-elegant">
-          <p className="text-sm font-semibold mb-1">{data.hour}</p>
+          <p className="text-sm font-semibold mb-1">
+            {data.hour}
+            {data.isNextDay && <span className="ml-1 text-xs text-muted-foreground">(Imorgon)</span>}
+          </p>
           <p className="text-sm font-bold" style={{ color: payload[0].color }}>
             {payload[0].value.toFixed(2)} kr/kWh (inkl. moms)
           </p>
@@ -129,13 +125,20 @@ const PriceChart = ({
     return null;
   };
 
+  // Generate subtitle with time range
+  const endHour = (currentHour + 23) % 24;
+  const subtitle = `Från ${currentHour.toString().padStart(2, '0')}:00 idag till ${endHour.toString().padStart(2, '0')}:00 imorgon`;
+
   return (
     <div className="bg-card rounded-lg shadow-card p-3 sm:p-4 lg:p-6 border border-border">
       <div className="mb-4 sm:mb-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
-          <h3 className="text-lg sm:text-xl font-bold text-foreground">
-            {title} {date && <span className="text-sm sm:text-base text-muted-foreground">({date})</span>}
-          </h3>
+          <div>
+            <h3 className="text-lg sm:text-xl font-bold text-foreground">
+              Elpriser kommande 24 timmar
+            </h3>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">{subtitle}</p>
+          </div>
           
           {/* Hour Selection Buttons */}
           <div className="flex flex-wrap gap-2">
@@ -147,7 +150,7 @@ const PriceChart = ({
                 onClick={() => {
                   const newValue = selectedHourWindow === hours ? null : hours;
                   onSelectedHourWindowChange?.(newValue);
-                  setSelectedHours([]); // Clear manually selected hours when clicking a button
+                  setSelectedHours([]);
                 }}
                 className="h-8 px-3 text-xs font-semibold"
                 style={selectedHourWindow === hours ? { 
@@ -164,7 +167,7 @@ const PriceChart = ({
         
         <div className="flex flex-col gap-1 sm:gap-2">
           <p className="text-xs sm:text-sm font-medium text-foreground">
-            Dagens snitt: <span className="text-base sm:text-lg font-bold">{avgTodayPrice.toFixed(2)} kr/kWh</span>
+            Snitt 24h: <span className="text-base sm:text-lg font-bold">{avgRollingPrice.toFixed(2)} kr/kWh</span>
           </p>
           <div className="flex items-center gap-2 text-xs sm:text-sm">
             <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}></div>
@@ -175,7 +178,6 @@ const PriceChart = ({
               <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(0, 84%, 60%)" }}></div>
               <span className="text-muted-foreground">
                 Valt laddningsfönster ({selectedHourWindow}h): {avgSelectedWindow.toFixed(2)} kr/kWh
-                {selectedWindow.spansToNextDay && " (sträcker till nästa dag)"}
               </span>
             </div>
           )}
@@ -214,7 +216,7 @@ const PriceChart = ({
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: "hsl(var(--accent) / 0.2)" }} />
           <ReferenceLine 
-            y={avgTodayPrice} 
+            y={avgRollingPrice} 
             stroke="hsl(var(--primary))" 
             strokeDasharray="5 5"
             strokeWidth={2.5}

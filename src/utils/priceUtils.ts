@@ -17,6 +17,12 @@ export interface PriceData {
   lastUpdated: string;
 }
 
+export interface Rolling24HourPrice extends HourlyPrice {
+  displayHour: string;
+  isNextDay: boolean;
+  originalHour: number;
+}
+
 // Mock data generator - replace with actual API call to Node.js proxy
 // Helper function to aggregate multiple price points per hour into a single average
 const aggregateHourlyPrices = (prices: HourlyPrice[]): HourlyPrice[] => {
@@ -87,6 +93,45 @@ export const generateMockPriceData = (): PriceData => {
     tomorrow,
     lastUpdated: now.toISOString(),
   };
+};
+
+// Create a rolling 24-hour view starting from current hour
+export const createRolling24HourView = (
+  todayPrices: HourlyPrice[],
+  tomorrowPrices: HourlyPrice[] | undefined,
+  currentHour: number
+): Rolling24HourPrice[] => {
+  const rolling24: Rolling24HourPrice[] = [];
+  
+  // Add remaining hours from today (current hour to 23:00)
+  for (let i = currentHour; i < 24; i++) {
+    const priceData = todayPrices.find(p => p.hour === i);
+    if (priceData) {
+      rolling24.push({
+        ...priceData,
+        displayHour: formatHour(i),
+        isNextDay: false,
+        originalHour: i
+      });
+    }
+  }
+  
+  // Add hours from tomorrow (00:00 to current hour - 1) if available
+  if (tomorrowPrices && tomorrowPrices.length > 0) {
+    for (let i = 0; i < currentHour; i++) {
+      const priceData = tomorrowPrices.find(p => p.hour === i);
+      if (priceData) {
+        rolling24.push({
+          ...priceData,
+          displayHour: `${formatHour(i)} +1`,
+          isNextDay: true,
+          originalHour: i
+        });
+      }
+    }
+  }
+  
+  return rolling24;
 };
 
 // Calculate average price for a time range
