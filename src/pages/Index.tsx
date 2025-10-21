@@ -83,8 +83,6 @@ const Index = () => {
       <HeroSection
         prices={priceData.today}
         optimalWindow={optimalWindow}
-        lastUpdated={priceData.lastUpdated}
-        onRefresh={loadPrices}
       />
 
       {/* Main Content */}
@@ -128,6 +126,7 @@ const Index = () => {
               todayPrices={priceData.today}
               yesterdayPrices={priceData.yesterday}
               optimalWindow={optimalWindow}
+              date={new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
             />
           </TabsContent>
 
@@ -139,6 +138,7 @@ const Index = () => {
                 yesterdayPrices={priceData.today}
                 optimalWindow={findCheapestWindow(priceData.tomorrow, 4)}
                 title="Prisutveckling imorgon"
+                date={new Date(new Date().setDate(new Date().getDate() + 1)).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
               />
             ) : (
               <div className="bg-card rounded-lg shadow-card p-8 border border-border text-center">
