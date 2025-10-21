@@ -97,10 +97,9 @@ const Index = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="overview">Översikt</TabsTrigger>
-            <TabsTrigger value="planning">Planering</TabsTrigger>
-            <TabsTrigger value="details">Detaljer</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6 h-14">
+            <TabsTrigger value="overview" className="text-lg">Översikt</TabsTrigger>
+            <TabsTrigger value="planning" className="text-lg">Planering</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -124,18 +123,6 @@ const Index = () => {
                 cheapestWindow={findCheapestWindow(priceData.today, 4)}
               />
             </div>
-          </TabsContent>
-
-          {/* Details Tab */}
-          <TabsContent value="details" className="space-y-6">
-            <PriceTable
-              prices={priceData.today}
-              title="Dagens priser"
-              cheapHours={cheapHours}
-              expensiveHours={expensiveHours}
-              optimalWindow={optimalWindow}
-              currentHour={currentHour}
-            />
           </TabsContent>
         </Tabs>
       </main>

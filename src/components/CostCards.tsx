@@ -8,6 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 
 interface CostCardsProps {
   prices: HourlyPrice[];
@@ -68,27 +70,32 @@ const categories: CostCategory[] = [
 const CostCards = ({ prices }: CostCardsProps) => {
   const [selectedCategory, setSelectedCategory] = useState<CostCategory | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [startHour, setStartHour] = useState(new Date().getHours());
+  const [duration, setDuration] = useState(3);
 
-  const calculateCost = (kWh: number) => {
-    const currentHour = new Date().getHours();
+  const calculateCost = (kWh: number, customStartHour?: number, customDuration?: number) => {
+    const start = customStartHour ?? new Date().getHours();
+    const dur = customDuration ?? 3;
     
-    // Get prices for current hour + next 2 hours
-    const next3Hours = [currentHour, currentHour + 1, currentHour + 2]
-      .map(h => h % 24)
+    // Get prices for selected hours
+    const hours = Array.from({ length: dur }, (_, i) => (start + i) % 24);
+    const selectedHours = hours
       .map(h => prices.find(p => p.hour === h))
       .filter(Boolean) as HourlyPrice[];
 
-    if (next3Hours.length === 0) return { min: 0, max: 0, avg: 0 };
+    if (selectedHours.length === 0) return { cost: 0, avgPrice: 0, totalCost: 0 };
 
-    const avgPrice = next3Hours.reduce((sum, p) => sum + p.price, 0) / next3Hours.length;
-    const costOre = avgPrice * kWh;
-    const costKr = costOre / 100;
+    const avgPrice = selectedHours.reduce((sum, p) => sum + p.price, 0) / selectedHours.length;
+    const totalCostOre = avgPrice * kWh;
+    const totalCostKr = totalCostOre / 100;
 
-    return { cost: costKr };
+    return { cost: totalCostKr, avgPrice: avgPrice / 100, totalCost: totalCostKr };
   };
 
   const handleCardClick = (category: CostCategory) => {
     setSelectedCategory(category);
+    setStartHour(new Date().getHours());
+    setDuration(3);
     setDialogOpen(true);
   };
 
@@ -136,23 +143,61 @@ const CostCards = ({ prices }: CostCardsProps) => {
             </DialogDescription>
           </DialogHeader>
           {selectedCategory && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="bg-muted rounded-lg p-4">
                 <p className="text-sm text-muted-foreground mb-1">Förbrukning</p>
                 <p className="text-lg font-semibold">{selectedCategory.kWhRange}</p>
               </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="start-hour" className="text-sm font-medium mb-2 block">
+                    Starttimme: {startHour.toString().padStart(2, '0')}:00
+                  </Label>
+                  <Slider
+                    id="start-hour"
+                    min={0}
+                    max={23}
+                    step={1}
+                    value={[startHour]}
+                    onValueChange={(value) => setStartHour(value[0])}
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="duration" className="text-sm font-medium mb-2 block">
+                    Varaktighet: {duration} {duration === 1 ? 'timme' : 'timmar'}
+                  </Label>
+                  <Slider
+                    id="duration"
+                    min={1}
+                    max={12}
+                    step={1}
+                    value={[duration]}
+                    onValueChange={(value) => setDuration(value[0])}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
               <div className="bg-price-cheap/10 rounded-lg p-4 border-2 border-price-cheap">
                 <p className="text-sm text-muted-foreground mb-1">Beräknad kostnad (inkl. moms)</p>
                 <p className="text-3xl font-bold text-price-cheap">
                   {selectedCategory.kWhMin === selectedCategory.kWhMax 
-                    ? `${calculateCost(selectedCategory.kWhMin).cost.toFixed(2)} kr`
-                    : `${calculateCost(selectedCategory.kWhMin).cost.toFixed(2)} - ${calculateCost(selectedCategory.kWhMax).cost.toFixed(2)} kr`
+                    ? `${calculateCost(selectedCategory.kWhMin, startHour, duration).totalCost.toFixed(2)} kr`
+                    : `${calculateCost(selectedCategory.kWhMin, startHour, duration).totalCost.toFixed(2)} - ${calculateCost(selectedCategory.kWhMax, startHour, duration).totalCost.toFixed(2)} kr`
                   }
                 </p>
+                <div className="mt-3 pt-3 border-t border-border">
+                  <p className="text-xs text-muted-foreground">
+                    Snittpris: {calculateCost(selectedCategory.kWhMin, startHour, duration).avgPrice.toFixed(2)} kr/kWh
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Period: {startHour.toString().padStart(2, '0')}:00 - {((startHour + duration) % 24).toString().padStart(2, '0')}:00
+                  </p>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                * Kostnaden är beräknad baserat på genomsnittspriset för nuvarande timme och de kommande 2 timmarna.
-              </p>
             </div>
           )}
         </DialogContent>

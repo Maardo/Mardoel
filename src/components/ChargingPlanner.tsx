@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HourlyPrice, findCheapestWindow, formatHour, formatPrice } from "@/utils/priceUtils";
 import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
@@ -9,20 +9,23 @@ interface ChargingPlannerProps {
 }
 
 const ChargingPlanner = ({ prices, onWindowSelect }: ChargingPlannerProps) => {
-  const [selectedWindow, setSelectedWindow] = useState(2);
-  const [result, setResult] = useState(findCheapestWindow(prices, 2));
+  const [selectedWindow, setSelectedWindow] = useState(4);
+  const [result, setResult] = useState(() => findCheapestWindow(prices, 4));
 
-  const windowOptions = [2, 3, 4, 6];
+  const windowOptions = [2, 3, 4, 6, 8];
 
-  const handleWindowChange = (hours: number) => {
-    setSelectedWindow(hours);
-    const newResult = findCheapestWindow(prices, hours);
+  useEffect(() => {
+    const newResult = findCheapestWindow(prices, selectedWindow);
     setResult(newResult);
     onWindowSelect({ 
       startHour: newResult.startHour, 
       endHour: newResult.endHour,
       avgPrice: newResult.avgPrice 
     });
+  }, [prices, selectedWindow, onWindowSelect]);
+
+  const handleWindowChange = (hours: number) => {
+    setSelectedWindow(hours);
   };
 
   return (
