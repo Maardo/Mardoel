@@ -35,6 +35,26 @@ const PriceTable = ({
   return (
     <div className="bg-card rounded-lg shadow-card p-6 border border-border">
       <h3 className="text-xl font-bold mb-6 text-foreground">{title}</h3>
+      
+      {/* Legend */}
+      <div className="mb-6 pb-4 border-b border-border">
+        <p className="text-sm font-semibold text-foreground mb-3">Färgkodning</p>
+        <div className="flex flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-price-cheap"></div>
+            <span className="text-xs text-muted-foreground">3 billigaste timmarna</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-price-expensive"></div>
+            <span className="text-xs text-muted-foreground">3 dyraste timmarna</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-price-optimal"></div>
+            <span className="text-xs text-muted-foreground">Bästa laddningsfönster</span>
+          </div>
+        </div>
+      </div>
+      
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>

@@ -8,11 +8,11 @@ import {
 } from "@/utils/priceUtils";
 import PriceTable from "@/components/PriceTable";
 import PriceChart from "@/components/PriceChart";
-import TimeRangeSelector from "@/components/TimeRangeSelector";
 import ChargingPlanner from "@/components/ChargingPlanner";
 import CostCalculator from "@/components/CostCalculator";
 import PriceNotification from "@/components/PriceNotification";
-import LastUpdated from "@/components/LastUpdated";
+import HeroSection from "@/components/HeroSection";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Zap } from "lucide-react";
 
 const Index = () => {
@@ -21,6 +21,7 @@ const Index = () => {
   const [optimalWindow, setOptimalWindow] = useState<{
     startHour: number;
     endHour: number;
+    avgPrice: number;
   } | null>(null);
 
   const currentHour = new Date().getHours();
@@ -63,85 +64,76 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-gradient-hero text-primary-foreground py-8 shadow-elegant">
+      <header className="bg-gradient-hero text-primary-foreground py-6 shadow-elegant">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3">
             <Zap className="w-8 h-8" />
-            <h1 className="text-3xl md:text-4xl font-bold">Elpriser SE3</h1>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold">Elpriser SE3</h1>
+              <p className="text-sm text-primary-foreground/80">
+                Aktuella elpriser och smart laddningsplanering
+              </p>
+            </div>
           </div>
-          <p className="text-primary-foreground/90">
-            Aktuella elpriser och smart laddningsplanering för Sverige
-          </p>
         </div>
       </header>
+
+      {/* Hero Section */}
+      <HeroSection
+        prices={priceData.today}
+        optimalWindow={optimalWindow}
+        lastUpdated={priceData.lastUpdated}
+        onRefresh={loadPrices}
+      />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         {/* Price Notification */}
         <PriceNotification prices={priceData.today} />
 
-        {/* Last Updated */}
-        <div className="mb-6">
-          <LastUpdated lastUpdated={priceData.lastUpdated} onRefresh={loadPrices} />
-        </div>
+        {/* Tabs */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="overview">Översikt</TabsTrigger>
+            <TabsTrigger value="planning">Planering</TabsTrigger>
+            <TabsTrigger value="details">Detaljer</TabsTrigger>
+          </TabsList>
 
-        {/* Legend */}
-        <div className="bg-card rounded-lg shadow-card p-4 mb-6">
-          <h3 className="text-sm font-semibold text-foreground mb-3">Färgkodning</h3>
-          <div className="flex flex-wrap gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-price-cheap"></div>
-              <span className="text-sm text-muted-foreground">3 billigaste timmarna</span>
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            <PriceChart
+              todayPrices={priceData.today}
+              yesterdayPrices={priceData.yesterday}
+              optimalWindow={optimalWindow}
+            />
+          </TabsContent>
+
+          {/* Planning Tab */}
+          <TabsContent value="planning" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ChargingPlanner
+                prices={priceData.today}
+                onWindowSelect={setOptimalWindow}
+              />
+              <CostCalculator
+                todayPrices={priceData.today}
+                cheapestWindow={findCheapestWindow(priceData.today, 2)}
+              />
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-price-expensive"></div>
-              <span className="text-sm text-muted-foreground">3 dyraste timmarna</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-price-optimal"></div>
-              <span className="text-sm text-muted-foreground">Bästa laddningsfönster</span>
-            </div>
-          </div>
-        </div>
+          </TabsContent>
 
-        {/* Tools Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <ChargingPlanner
-            prices={priceData.today}
-            onWindowSelect={setOptimalWindow}
-          />
-          <TimeRangeSelector prices={priceData.today} />
-        </div>
-
-        {/* Cost Calculator */}
-        <div className="mb-6">
-          <CostCalculator
-            todayPrices={priceData.today}
-            cheapestWindow={findCheapestWindow(priceData.today, 2)}
-          />
-        </div>
-
-        {/* Chart */}
-        <div className="mb-6">
-          <PriceChart
-            todayPrices={priceData.today}
-            yesterdayPrices={priceData.yesterday}
-            optimalWindow={optimalWindow}
-          />
-        </div>
-
-        {/* Price Table */}
-        <div className="mb-6">
-          <PriceTable
-            prices={priceData.today}
-            title="Dagens priser"
-            cheapHours={cheapHours}
-            expensiveHours={expensiveHours}
-            optimalWindow={optimalWindow}
-            currentHour={currentHour}
-          />
-        </div>
-
+          {/* Details Tab */}
+          <TabsContent value="details" className="space-y-6">
+            <PriceTable
+              prices={priceData.today}
+              title="Dagens priser"
+              cheapHours={cheapHours}
+              expensiveHours={expensiveHours}
+              optimalWindow={optimalWindow}
+              currentHour={currentHour}
+            />
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Footer */}

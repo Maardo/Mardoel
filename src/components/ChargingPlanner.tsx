@@ -5,7 +5,7 @@ import { Zap } from "lucide-react";
 
 interface ChargingPlannerProps {
   prices: HourlyPrice[];
-  onWindowSelect: (window: { startHour: number; endHour: number }) => void;
+  onWindowSelect: (window: { startHour: number; endHour: number; avgPrice: number }) => void;
 }
 
 const ChargingPlanner = ({ prices, onWindowSelect }: ChargingPlannerProps) => {
@@ -18,7 +18,11 @@ const ChargingPlanner = ({ prices, onWindowSelect }: ChargingPlannerProps) => {
     setSelectedWindow(hours);
     const newResult = findCheapestWindow(prices, hours);
     setResult(newResult);
-    onWindowSelect({ startHour: newResult.startHour, endHour: newResult.endHour });
+    onWindowSelect({ 
+      startHour: newResult.startHour, 
+      endHour: newResult.endHour,
+      avgPrice: newResult.avgPrice 
+    });
   };
 
   return (
