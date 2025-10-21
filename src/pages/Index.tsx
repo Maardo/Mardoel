@@ -40,11 +40,11 @@ const Index = () => {
     loadPrices();
   }, []);
 
-  // Auto-refresh every hour
+  // Auto-refresh every 15 minutes
   useEffect(() => {
     const interval = setInterval(() => {
       loadPrices();
-    }, 3600000); // 1 hour
+    }, 900000); // 15 minutes
 
     return () => clearInterval(interval);
   }, []);
@@ -148,7 +148,7 @@ const Index = () => {
       <footer className="bg-card border-t border-border mt-12 py-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <p>
-            Live-priser från Nord Pool via Lovable Cloud. Data uppdateras automatiskt varje timme.
+            Live-priser från Nord Pool via Lovable Cloud. Data uppdateras automatiskt var 15:e minut.
           </p>
         </div>
       </footer>
