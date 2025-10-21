@@ -3,9 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface HourlyPrice {
   hour: number;
-  price: number; // öre/kWh
+  price: number; // öre/kWh (inkl. moms)
   timestamp: string;
 }
+
+// VAT rate for Sweden
+export const VAT_RATE = 1.25;
 
 export interface PriceData {
   today: HourlyPrice[];
@@ -24,9 +27,10 @@ export const fetchPriceData = async (): Promise<PriceData> => {
       throw error;
     }
     
+    // Add VAT to all prices
     return {
-      today: data.today,
-      yesterday: data.yesterday,
+      today: data.today.map((p: HourlyPrice) => ({ ...p, price: Math.round(p.price * VAT_RATE) })),
+      yesterday: data.yesterday.map((p: HourlyPrice) => ({ ...p, price: Math.round(p.price * VAT_RATE) })),
       lastUpdated: data.lastUpdated,
     };
   } catch (error) {
@@ -39,13 +43,13 @@ export const generateMockPriceData = (): PriceData => {
   const now = new Date();
   const today = Array.from({ length: 24 }, (_, i) => ({
     hour: i,
-    price: Math.round(50 + Math.random() * 150 + Math.sin(i / 3) * 50),
+    price: Math.round((50 + Math.random() * 150 + Math.sin(i / 3) * 50) * VAT_RATE), // Include VAT
     timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate(), i).toISOString(),
   }));
 
   const yesterday = Array.from({ length: 24 }, (_, i) => ({
     hour: i,
-    price: Math.round(60 + Math.random() * 140 + Math.sin(i / 3) * 45),
+    price: Math.round((60 + Math.random() * 140 + Math.sin(i / 3) * 45) * VAT_RATE), // Include VAT
     timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, i).toISOString(),
   }));
 

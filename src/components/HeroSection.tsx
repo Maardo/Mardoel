@@ -73,7 +73,7 @@ const HeroSection = ({ prices, optimalWindow, lastUpdated, onRefresh }: HeroSect
               {currentPrice ? formatPrice(currentPrice.price) : "-"}
             </div>
             <p className="text-sm text-primary-foreground/80">
-              Klockan {formatHour(currentHour)}
+              Klockan {formatHour(currentHour)} (inkl. moms)
             </p>
           </div>
 
@@ -83,16 +83,16 @@ const HeroSection = ({ prices, optimalWindow, lastUpdated, onRefresh }: HeroSect
               <Clock className="w-8 h-8 text-price-optimal" />
               <div>
                 <p className="text-sm text-primary-foreground/80">Bästa laddningstid</p>
-                <p className="text-lg font-semibold">2-timmars fönster</p>
+                <p className="text-lg font-semibold">4-timmars fönster</p>
               </div>
             </div>
             {optimalWindow ? (
               <>
                 <div className="text-4xl font-bold mb-2">
-                  {formatHour(optimalWindow.startHour)} - {formatHour(optimalWindow.endHour)}
+                  {formatHour(optimalWindow.startHour)} - {formatHour(optimalWindow.endHour + 1)}
                 </div>
                 <p className="text-sm text-primary-foreground/80">
-                  Snittpris: {formatPrice(Math.round(optimalWindow.avgPrice))}
+                  Snittpris: {formatPrice(Math.round(optimalWindow.avgPrice))} (inkl. moms)
                 </p>
               </>
             ) : (

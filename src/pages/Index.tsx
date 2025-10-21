@@ -12,6 +12,7 @@ import ChargingPlanner from "@/components/ChargingPlanner";
 import CostCalculator from "@/components/CostCalculator";
 import PriceNotification from "@/components/PriceNotification";
 import HeroSection from "@/components/HeroSection";
+import CostCards from "@/components/CostCards";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Zap } from "lucide-react";
 
@@ -32,7 +33,7 @@ const Index = () => {
     setLoading(true);
     const data = await fetchPriceData();
     setPriceData(data);
-    setOptimalWindow(findCheapestWindow(data.today, 2));
+    setOptimalWindow(findCheapestWindow(data.today, 4)); // 4-hour window
     setLoading(false);
   };
 
@@ -91,6 +92,9 @@ const Index = () => {
         {/* Price Notification */}
         <PriceNotification prices={priceData.today} />
 
+        {/* Cost Cards */}
+        <CostCards prices={priceData.today} />
+
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
@@ -117,7 +121,7 @@ const Index = () => {
               />
               <CostCalculator
                 todayPrices={priceData.today}
-                cheapestWindow={findCheapestWindow(priceData.today, 2)}
+                cheapestWindow={findCheapestWindow(priceData.today, 4)}
               />
             </div>
           </TabsContent>

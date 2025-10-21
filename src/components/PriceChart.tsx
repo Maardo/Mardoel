@@ -1,38 +1,56 @@
-import { HourlyPrice } from "@/utils/priceUtils";
+import { HourlyPrice, getCheapestHours } from "@/utils/priceUtils";
 import { formatHour } from "@/utils/priceUtils";
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
-  ReferenceLine,
+  Cell,
 } from "recharts";
 
 interface PriceChartProps {
   todayPrices: HourlyPrice[];
   yesterdayPrices: HourlyPrice[];
-  optimalWindow?: { startHour: number; endHour: number };
+  optimalWindow?: { startHour: number; endHour: number; avgPrice: number };
 }
 
 const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartProps) => {
+  // Get the 4 cheapest hours
+  const cheapest4Hours = [...todayPrices]
+    .sort((a, b) => a.price - b.price)
+    .slice(0, 4)
+    .map(p => p.hour);
+
+  // Calculate average price for the 4 cheapest hours
+  const avgCheapest4 = Math.round(
+    todayPrices
+      .filter(p => cheapest4Hours.includes(p.hour))
+      .reduce((sum, p) => sum + p.price, 0) / 4
+  );
+
   // Combine data for chart
   const chartData = todayPrices.map((today) => ({
     hour: formatHour(today.hour),
-    pris: today.price / 100, // Convert to kr
+    hourNum: today.hour,
+    pris: today.price / 100, // Convert to kr (inkl. moms)
+    isCheap: cheapest4Hours.includes(today.hour),
   }));
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
+      const isCheap = payload[0].payload.isCheap;
       return (
         <div className="bg-card border border-border rounded-lg p-3 shadow-elegant">
           <p className="text-sm font-semibold mb-1">{payload[0].payload.hour}</p>
           <p className="text-sm font-bold" style={{ color: payload[0].color }}>
-            {payload[0].value.toFixed(2)} kr/kWh
+            {payload[0].value.toFixed(2)} kr/kWh (inkl. moms)
           </p>
+          {isCheap && (
+            <p className="text-xs text-price-cheap mt-1">✓ Billigaste 4 timmarna</p>
+          )}
         </div>
       );
     }
@@ -41,59 +59,47 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartP
 
   return (
     <div className="bg-card rounded-lg shadow-card p-6 border border-border">
-      <h3 className="text-xl font-bold mb-6 text-foreground">Prisutveckling idag</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+      <div className="mb-6">
+        <h3 className="text-xl font-bold text-foreground mb-2">Prisutveckling idag</h3>
+        <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-price-cheap"></div>
+            <span className="text-muted-foreground">Billigaste 4 timmarna (snitt: {(avgCheapest4 / 100).toFixed(2)} kr/kWh)</span>
+          </div>
+        </div>
+      </div>
+      <ResponsiveContainer width="100%" height={350}>
+        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
           <XAxis
             dataKey="hour"
             stroke="hsl(var(--muted-foreground))"
-            tick={{ fontSize: 12 }}
-            interval={2}
+            tick={{ fontSize: 11 }}
+            interval={1}
+            angle={-45}
+            textAnchor="end"
+            height={80}
           />
           <YAxis
             stroke="hsl(var(--muted-foreground))"
             tick={{ fontSize: 12 }}
             label={{
-              value: "kr/kWh",
+              value: "kr/kWh (inkl. moms)",
               angle: -90,
               position: "insideLeft",
               style: { fontSize: 12, fill: "hsl(var(--muted-foreground))" },
             }}
           />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend
-            wrapperStyle={{ fontSize: 14 }}
-            iconType="line"
-          />
-          {optimalWindow && (
-            <>
-              <ReferenceLine
-                x={formatHour(optimalWindow.startHour)}
-                stroke="hsl(var(--price-optimal))"
-                strokeDasharray="3 3"
-                strokeWidth={2}
-                label={{ value: "Start", position: "top", fontSize: 10 }}
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: "hsl(var(--accent) / 0.3)" }} />
+          <Bar dataKey="pris" radius={[8, 8, 0, 0]} maxBarSize={40}>
+            {chartData.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={entry.isCheap ? "hsl(var(--price-cheap))" : "hsl(var(--primary))"}
               />
-              <ReferenceLine
-                x={formatHour(optimalWindow.endHour)}
-                stroke="hsl(var(--price-optimal))"
-                strokeDasharray="3 3"
-                strokeWidth={2}
-                label={{ value: "Slut", position: "top", fontSize: 10 }}
-              />
-            </>
-          )}
-          <Line
-            type="monotone"
-            dataKey="pris"
-            stroke="hsl(var(--primary))"
-            strokeWidth={3}
-            dot={{ fill: "hsl(var(--primary))", r: 4 }}
-            activeDot={{ r: 6 }}
-            name="Pris"
-          />
-        </LineChart>
+            ))}
+          </Bar>
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );
