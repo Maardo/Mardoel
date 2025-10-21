@@ -8,7 +8,7 @@ import {
 } from "@/utils/priceUtils";
 import PriceTable from "@/components/PriceTable";
 import PriceChart from "@/components/PriceChart";
-import CostCalculator from "@/components/CostCalculator";
+
 import PriceNotification from "@/components/PriceNotification";
 import HeroSection from "@/components/HeroSection";
 import CostCards from "@/components/CostCards";
@@ -120,11 +120,6 @@ const Index = () => {
               date={new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
             />
             
-            {/* Cost Calculator */}
-            <CostCalculator
-              todayPrices={priceData.today}
-              cheapestWindow={findCheapestWindow(priceData.today, 4)}
-            />
           </TabsContent>
 
           {/* Tomorrow Tab */}
