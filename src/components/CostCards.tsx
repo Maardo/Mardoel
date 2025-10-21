@@ -72,6 +72,7 @@ const CostCards = ({ prices }: CostCardsProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [startHour, setStartHour] = useState(new Date().getHours());
   const [duration, setDuration] = useState(3);
+  const [customKwh, setCustomKwh] = useState(50);
 
   const calculateCost = (kWh: number, customStartHour?: number, customDuration?: number) => {
     const start = customStartHour ?? new Date().getHours();
@@ -96,6 +97,7 @@ const CostCards = ({ prices }: CostCardsProps) => {
     setSelectedCategory(category);
     setStartHour(new Date().getHours());
     setDuration(3);
+    setCustomKwh(Math.round((category.kWhMin + category.kWhMax) / 2));
     setDialogOpen(true);
   };
 
@@ -144,12 +146,22 @@ const CostCards = ({ prices }: CostCardsProps) => {
           </DialogHeader>
           {selectedCategory && (
             <div className="space-y-6">
-              <div className="bg-muted rounded-lg p-4">
-                <p className="text-sm text-muted-foreground mb-1">Förbrukning</p>
-                <p className="text-lg font-semibold">{selectedCategory.kWhRange}</p>
-              </div>
-
               <div className="space-y-4">
+                <div>
+                  <Label htmlFor="kwh-slider" className="text-sm font-medium mb-2 block">
+                    Förbrukning: {customKwh} kWh
+                  </Label>
+                  <Slider
+                    id="kwh-slider"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={[customKwh]}
+                    onValueChange={(value) => setCustomKwh(value[0])}
+                    className="w-full"
+                  />
+                </div>
+
                 <div>
                   <Label htmlFor="start-hour" className="text-sm font-medium mb-2 block">
                     Starttimme: {startHour.toString().padStart(2, '0')}:00
@@ -184,14 +196,11 @@ const CostCards = ({ prices }: CostCardsProps) => {
               <div className="bg-price-cheap/10 rounded-lg p-4 border-2 border-price-cheap">
                 <p className="text-sm text-muted-foreground mb-1">Beräknad kostnad (inkl. moms)</p>
                 <p className="text-3xl font-bold text-price-cheap">
-                  {selectedCategory.kWhMin === selectedCategory.kWhMax 
-                    ? `${calculateCost(selectedCategory.kWhMin, startHour, duration).totalCost.toFixed(2)} kr`
-                    : `${calculateCost(selectedCategory.kWhMin, startHour, duration).totalCost.toFixed(2)} - ${calculateCost(selectedCategory.kWhMax, startHour, duration).totalCost.toFixed(2)} kr`
-                  }
+                  {calculateCost(customKwh, startHour, duration).totalCost.toFixed(2)} kr
                 </p>
                 <div className="mt-3 pt-3 border-t border-border">
                   <p className="text-xs text-muted-foreground">
-                    Snittpris: {calculateCost(selectedCategory.kWhMin, startHour, duration).avgPrice.toFixed(2)} kr/kWh
+                    Snittpris: {calculateCost(customKwh, startHour, duration).avgPrice.toFixed(2)} kr/kWh
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Period: {startHour.toString().padStart(2, '0')}:00 - {((startHour + duration) % 24).toString().padStart(2, '0')}:00

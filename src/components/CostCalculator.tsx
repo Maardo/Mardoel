@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { HourlyPrice, calculateSavings } from "@/utils/priceUtils";
-import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 import { Calculator, TrendingDown } from "lucide-react";
 
 interface CostCalculatorProps {
@@ -23,15 +24,16 @@ const CostCalculator = ({ todayPrices, cheapestWindow }: CostCalculatorProps) =>
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-medium text-muted-foreground mb-2">
-          Energianvändning (kWh)
-        </label>
-        <Input
-          type="number"
-          value={kWh}
-          onChange={(e) => setKWh(parseFloat(e.target.value) || 0)}
-          min="0"
-          step="1"
+        <Label htmlFor="kwh-calculator" className="text-sm font-medium mb-2 block">
+          Förbrukning: {kWh} kWh
+        </Label>
+        <Slider
+          id="kwh-calculator"
+          min={0}
+          max={100}
+          step={1}
+          value={[kWh]}
+          onValueChange={(value) => setKWh(value[0])}
           className="w-full"
         />
         <p className="text-xs text-muted-foreground mt-1">

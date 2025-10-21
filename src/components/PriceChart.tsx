@@ -70,7 +70,7 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
 
   // Get bar color based on status - selected always takes priority
   const getBarColor = (entry: any) => {
-    if (entry.isSelected) return "hsl(var(--accent))"; // Selected is blue, even if cheap
+    if (entry.isSelected) return "hsl(35, 91%, 55%)"; // Orange/yellow for selected
     if (entry.isCheap) return "hsl(var(--price-cheap))";
     return "hsl(var(--primary) / 0.6)";
   };
@@ -108,8 +108,8 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
           </div>
           {selectedHours.length > 0 && (
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-accent"></div>
-              <span className="text-muted-foreground">Valda timmar ({selectedHours.length} st, snitt: {avgSelectedPrice?.toFixed(2)} kr/kWh)</span>
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: "hsl(35, 91%, 55%)" }}></div>
+              <span className="text-muted-foreground">({selectedHours.length} {selectedHours.length === 1 ? 'timma' : 'timmar'}, snitt: {avgSelectedPrice?.toFixed(2)} kr/kWh)</span>
             </div>
           )}
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -147,13 +147,6 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
             stroke="hsl(var(--primary))" 
             strokeDasharray="5 5"
             strokeWidth={2.5}
-            label={{ 
-              value: `Snitt: ${avgTodayPrice.toFixed(2)} kr/kWh`, 
-              position: "top",
-              fill: "hsl(var(--foreground))",
-              fontSize: 12,
-              fontWeight: 600
-            }}
           />
           <Bar 
             dataKey="pris" 

@@ -97,26 +97,30 @@ const Index = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 gap-3 mb-6 h-auto bg-transparent">
-            <TabsTrigger 
-              value="overview" 
-              className="text-base sm:text-lg h-12 border-2 border-border data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-md"
-            >
-              Översikt
-            </TabsTrigger>
-            <TabsTrigger 
-              value="planning" 
-              className="text-base sm:text-lg h-12 border-2 border-border data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-md"
-            >
-              Planering
-            </TabsTrigger>
-            <TabsTrigger 
-              value="tomorrow" 
-              className="text-base sm:text-lg h-12 border-2 border-border data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-md"
-            >
-              Morgondagens priser
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex flex-col gap-3 mb-6">
+            <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 gap-3 h-auto bg-transparent">
+              <TabsTrigger 
+                value="overview" 
+                className="text-base sm:text-lg h-12 border-2 border-border data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-md"
+              >
+                Översikt
+              </TabsTrigger>
+              <TabsTrigger 
+                value="planning" 
+                className="text-base sm:text-lg h-12 border-2 border-border data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-md"
+              >
+                Planering
+              </TabsTrigger>
+            </TabsList>
+            <TabsList className="grid w-full grid-cols-1 gap-3 h-auto bg-transparent">
+              <TabsTrigger 
+                value="tomorrow" 
+                className="text-base sm:text-lg h-12 border-2 border-border data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-md"
+              >
+                Morgondagens priser
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">

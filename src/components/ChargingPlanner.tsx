@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { HourlyPrice, findCheapestWindow, formatHour, formatPrice } from "@/utils/priceUtils";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 import { Zap } from "lucide-react";
 
 interface ChargingPlannerProps {
@@ -10,6 +12,7 @@ interface ChargingPlannerProps {
 
 const ChargingPlanner = ({ prices, onWindowSelect }: ChargingPlannerProps) => {
   const [selectedWindow, setSelectedWindow] = useState(4);
+  const [kWh, setKWh] = useState(50);
   const [result, setResult] = useState(() => findCheapestWindow(prices, 4));
 
   const windowOptions = [2, 3, 4, 6, 8];
@@ -52,6 +55,21 @@ const ChargingPlanner = ({ prices, onWindowSelect }: ChargingPlannerProps) => {
         ))}
       </div>
 
+      <div className="mb-6">
+        <Label htmlFor="kwh-planner" className="text-sm font-medium mb-2 block">
+          Förbrukning: {kWh} kWh
+        </Label>
+        <Slider
+          id="kwh-planner"
+          min={0}
+          max={100}
+          step={1}
+          value={[kWh]}
+          onValueChange={(value) => setKWh(value[0])}
+          className="w-full"
+        />
+      </div>
+
       <div className="bg-price-optimal rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-price-optimal-foreground">
@@ -65,7 +83,10 @@ const ChargingPlanner = ({ prices, onWindowSelect }: ChargingPlannerProps) => {
         <p className="text-lg font-semibold text-price-optimal-foreground">
           {formatPrice(result.avgPrice)}
         </p>
-        <p className="text-xs text-price-optimal-foreground/80 mt-2">
+        <p className="text-sm text-price-optimal-foreground/90 mt-2">
+          Beräknad kostnad: {((result.avgPrice / 100) * kWh).toFixed(2)} kr
+        </p>
+        <p className="text-xs text-price-optimal-foreground/80 mt-1">
           Detta är den billigaste {selectedWindow}-timmarsperioden idag
         </p>
       </div>
