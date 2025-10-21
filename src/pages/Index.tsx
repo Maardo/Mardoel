@@ -23,10 +23,40 @@ const Index = () => {
     endHour: number;
     avgPrice: number;
   } | null>(null);
+  const [selectedHourWindow, setSelectedHourWindow] = useState<number | null>(null);
 
   const currentHour = new Date().getHours();
   const cheapHours = priceData ? getCheapestHours(priceData.today) : [];
   const expensiveHours = priceData ? getExpensiveHours(priceData.today) : [];
+
+  // Calculate selected window and hours for both charts
+  const selectedWindowData = selectedHourWindow && priceData?.tomorrow
+    ? (() => {
+        const { findCheapestWindowAcrossDays } = require("@/utils/priceUtils");
+        const window = findCheapestWindowAcrossDays(priceData.today, priceData.tomorrow, selectedHourWindow);
+        
+        // Determine which hours belong to today and which to tomorrow
+        const todayHours: number[] = [];
+        const tomorrowHours: number[] = [];
+        
+        for (let i = 0; i < selectedHourWindow; i++) {
+          const hour = window.startHour + i;
+          if (hour < 24) {
+            todayHours.push(hour);
+          } else {
+            tomorrowHours.push(hour - 24); // Normalize back to 0-23
+          }
+        }
+        
+        return { window, todayHours, tomorrowHours };
+      })()
+    : selectedHourWindow && priceData
+    ? (() => {
+        const window = findCheapestWindow(priceData.today, selectedHourWindow);
+        const todayHours = Array.from({ length: selectedHourWindow }, (_, i) => window.startHour + i);
+        return { window: { ...window, spansToNextDay: false }, todayHours, tomorrowHours: [] };
+      })()
+    : null;
 
   const loadPrices = async () => {
     setLoading(true);
@@ -119,6 +149,10 @@ const Index = () => {
               tomorrowPrices={priceData.tomorrow}
               optimalWindow={optimalWindow}
               date={new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
+              selectedHourWindow={selectedHourWindow}
+              onSelectedHourWindowChange={setSelectedHourWindow}
+              selectedWindowHours={selectedWindowData?.todayHours || []}
+              selectedWindow={selectedWindowData?.window}
             />
             
           </TabsContent>
@@ -133,6 +167,10 @@ const Index = () => {
                 optimalWindow={findCheapestWindow(priceData.tomorrow, 4)}
                 title="Prisutveckling imorgon"
                 date={new Date(new Date().setDate(new Date().getDate() + 1)).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
+                selectedHourWindow={selectedHourWindow}
+                onSelectedHourWindowChange={setSelectedHourWindow}
+                selectedWindowHours={selectedWindowData?.tomorrowHours || []}
+                selectedWindow={selectedWindowData?.window}
               />
             ) : (
               <div className="bg-card rounded-lg shadow-card p-8 border border-border text-center">

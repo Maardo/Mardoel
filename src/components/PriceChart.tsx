@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { HourlyPrice, findCheapestWindow, findCheapestWindowAcrossDays } from "@/utils/priceUtils";
+import { HourlyPrice, findCheapestWindow } from "@/utils/priceUtils";
 import { formatHour } from "@/utils/priceUtils";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -23,11 +21,25 @@ interface PriceChartProps {
   optimalWindow?: { startHour: number; endHour: number; avgPrice: number };
   title?: string;
   date?: string;
+  selectedHourWindow?: number | null;
+  onSelectedHourWindowChange?: (hours: number | null) => void;
+  selectedWindowHours?: number[];
+  selectedWindow?: { startHour: number; endHour: number; avgPrice: number; spansToNextDay?: boolean };
 }
 
-const PriceChart = ({ todayPrices, yesterdayPrices, tomorrowPrices, optimalWindow, title = "Prisutveckling idag", date }: PriceChartProps) => {
+const PriceChart = ({ 
+  todayPrices, 
+  yesterdayPrices, 
+  tomorrowPrices, 
+  optimalWindow, 
+  title = "Prisutveckling idag", 
+  date,
+  selectedHourWindow,
+  onSelectedHourWindowChange,
+  selectedWindowHours = [],
+  selectedWindow
+}: PriceChartProps) => {
   const [selectedHours, setSelectedHours] = useState<number[]>([]);
-  const [selectedHourWindow, setSelectedHourWindow] = useState<number | null>(null);
 
   // Get the 4 cheapest consecutive hours (static green)
   const cheapestWindow = findCheapestWindow(todayPrices, 4);
@@ -35,18 +47,6 @@ const PriceChart = ({ todayPrices, yesterdayPrices, tomorrowPrices, optimalWindo
     { length: 4 }, 
     (_, i) => (cheapestWindow.startHour + i) % 24 // Handle wrap-around at midnight
   );
-
-  // Get the selected hour window (dynamic red) - can span across days
-  const selectedWindow = selectedHourWindow && tomorrowPrices
-    ? findCheapestWindowAcrossDays(todayPrices, tomorrowPrices, selectedHourWindow)
-    : selectedHourWindow 
-    ? { ...findCheapestWindow(todayPrices, selectedHourWindow), spansToNextDay: false }
-    : null;
-  
-  const selectedWindowHours = selectedWindow ? Array.from(
-    { length: selectedHourWindow! },
-    (_, i) => (selectedWindow.startHour + i) % 24 // Handle wrap-around at midnight
-  ) : [];
   
   // Calculate average price for selected window hours
   const avgSelectedWindow = selectedWindow ? selectedWindow.avgPrice / 100 : null;
@@ -79,7 +79,7 @@ const PriceChart = ({ todayPrices, yesterdayPrices, tomorrowPrices, optimalWindo
       hourNum: i,
       pris: hourData ? hourData.price / 100 : 0,
       isCheap: hourData && cheapest4Hours.includes(i), // 4 cheapest consecutive hours (green)
-      isSelectedWindow: hourData && selectedWindowHours.includes(i), // Selected charging window (purple)
+      isSelectedWindow: hourData && selectedWindowHours.includes(i), // Selected charging window from parent (red)
       isSelected: selectedHours.includes(i), // Manually selected (orange)
     };
   });
@@ -145,7 +145,8 @@ const PriceChart = ({ todayPrices, yesterdayPrices, tomorrowPrices, optimalWindo
                 size="sm"
                 variant={selectedHourWindow === hours ? "default" : "outline"}
                 onClick={() => {
-                  setSelectedHourWindow(selectedHourWindow === hours ? null : hours);
+                  const newValue = selectedHourWindow === hours ? null : hours;
+                  onSelectedHourWindowChange?.(newValue);
                   setSelectedHours([]); // Clear manually selected hours when clicking a button
                 }}
                 className="h-8 px-3 text-xs font-semibold"
@@ -187,16 +188,6 @@ const PriceChart = ({ todayPrices, yesterdayPrices, tomorrowPrices, optimalWindo
         </div>
       </div>
 
-      {/* Alert for cross-midnight windows */}
-      {selectedWindow && selectedWindow.spansToNextDay && (
-        <Alert className="mb-4 border-amber-500/50 bg-amber-500/10">
-          <Info className="h-4 w-4 text-amber-600" />
-          <AlertDescription className="text-sm">
-            <span className="font-semibold">OBS:</span> Detta laddningsfönster går över midnatt (kl {selectedWindow.startHour.toString().padStart(2, '0')}:00 - {selectedWindow.endHour.toString().padStart(2, '0')}:00 morgondag). 
-            Kolla även <span className="font-semibold">Morgondagens priser</span> för fullständig översikt.
-          </AlertDescription>
-        </Alert>
-      )}
 
       <ResponsiveContainer width="100%" height={300} className="sm:h-[400px]">
         <BarChart data={chartData} margin={{ top: 50, right: 10, left: 0, bottom: 5 }}>
