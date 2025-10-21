@@ -25,20 +25,18 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Fetching Nord Pool prices for SE3...');
+    console.log('Fetching electricity prices for SE3...');
 
-    // Fetch today's prices
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     
-    // Fetch yesterday's prices
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-    // Nord Pool API endpoints
-    const todayUrl = `https://dataportal-api.nordpoolgroup.com/api/DayAheadPrices?date=${todayStr}&market=DayAhead&deliveryArea=SE3&currency=SEK`;
-    const yesterdayUrl = `https://dataportal-api.nordpoolgroup.com/api/DayAheadPrices?date=${yesterdayStr}&market=DayAhead&deliveryArea=SE3&currency=SEK`;
+    // Using Elpriset Just Nu API - free and reliable for Swedish electricity prices
+    const todayUrl = `https://www.elprisetjustnu.se/api/v1/prices/${todayStr.split('-')[0]}/${todayStr.split('-')[1]}-${todayStr.split('-')[2]}_SE3.json`;
+    const yesterdayUrl = `https://www.elprisetjustnu.se/api/v1/prices/${yesterdayStr.split('-')[0]}/${yesterdayStr.split('-')[1]}-${yesterdayStr.split('-')[2]}_SE3.json`;
 
     console.log('Fetching from:', todayUrl);
 
@@ -57,67 +55,36 @@ Deno.serve(async (req) => {
     ]);
 
     if (!todayResponse.ok) {
-      console.error('Nord Pool API error (today):', todayResponse.status, todayResponse.statusText);
-      throw new Error(`Nord Pool API returned ${todayResponse.status}`);
+      console.error('API error (today):', todayResponse.status, todayResponse.statusText);
+      throw new Error(`API returned ${todayResponse.status}`);
     }
 
     const todayData = await todayResponse.json();
     const yesterdayData = yesterdayResponse.ok ? await yesterdayResponse.json() : null;
 
-    console.log('Successfully fetched Nord Pool data');
-    console.log('Today data structure:', JSON.stringify(todayData).substring(0, 500));
+    console.log('Successfully fetched price data');
+    console.log(`Today: ${todayData?.length || 0} prices`);
 
     // Transform the data
-    const transformPrices = (data: any): HourlyPrice[] => {
-      // Check different possible data structures
-      let entries = data?.multiAreaEntries || data?.data || [];
-      
-      if (Array.isArray(data)) {
-        entries = data;
-      }
-
-      if (!entries || entries.length === 0) {
-        console.warn('No entries found in response. Data keys:', Object.keys(data || {}));
+    const transformPrices = (data: any[]): HourlyPrice[] => {
+      if (!Array.isArray(data) || data.length === 0) {
+        console.warn('No price entries in response');
         return [];
       }
 
-      console.log(`Processing ${entries.length} entries`);
-      
-      const prices = entries
-        .filter((entry: any) => {
-          // Try different area field names
-          const area = entry.deliveryArea || entry.area || entry.priceArea || entry.Areas;
-          return area === 'SE3' || area?.includes('SE3');
-        })
+      return data
         .map((entry: any) => {
-          // Try different timestamp field names
-          const timestamp = entry.deliveryStart || entry.HourUTC || entry.timestamp || entry.time;
-          const date = new Date(timestamp);
-          
-          // Try different price field names (convert from SEK/MWh to öre/kWh)
-          let priceValue = entry.entryPerArea?.[0]?.spotPrice 
-            || entry.spotPrice 
-            || entry.SpotPriceSEK 
-            || entry.price 
-            || 0;
-            
-          // Nord Pool API returns SEK/MWh, convert to öre/kWh (divide by 10)
-          const price = Math.round(priceValue / 10);
+          const date = new Date(entry.time_start);
+          // API returns SEK per kWh, convert to öre per kWh
+          const price = Math.round(entry.SEK_per_kWh * 100);
           
           return {
             hour: date.getHours(),
             price: price,
-            timestamp: timestamp,
+            timestamp: entry.time_start,
           };
         })
         .sort((a: HourlyPrice, b: HourlyPrice) => a.hour - b.hour);
-
-      console.log(`Transformed to ${prices.length} prices for SE3`);
-      if (prices.length > 0) {
-        console.log('Sample price:', JSON.stringify(prices[0]));
-      }
-      
-      return prices;
     };
 
     const todayPrices = transformPrices(todayData);

@@ -148,7 +148,7 @@ const Index = () => {
       <footer className="bg-card border-t border-border mt-12 py-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <p>
-            Live-priser från Nord Pool via Lovable Cloud. Data uppdateras automatiskt var 15:e minut.
+            Live spotpriser via Elpriset Just Nu API. Data uppdateras automatiskt var 15:e minut.
           </p>
         </div>
       </footer>
