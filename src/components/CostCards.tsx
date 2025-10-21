@@ -86,11 +86,17 @@ const CostCards = ({ prices }: CostCardsProps) => {
 
     if (selectedHours.length === 0) return { cost: 0, avgPrice: 0, totalCost: 0 };
 
-    const avgPrice = selectedHours.reduce((sum, p) => sum + p.price, 0) / selectedHours.length;
-    const totalCostOre = avgPrice * kWh;
+    // Prices are in öre/kWh, calculate average
+    const avgPriceOre = selectedHours.reduce((sum, p) => sum + p.price, 0) / selectedHours.length;
+    
+    // Calculate total cost in öre, then convert to kr
+    const totalCostOre = avgPriceOre * kWh;
     const totalCostKr = totalCostOre / 100;
+    
+    // Convert average price to kr/kWh for display
+    const avgPriceKr = avgPriceOre / 100;
 
-    return { cost: totalCostKr, avgPrice: avgPrice / 100, totalCost: totalCostKr };
+    return { cost: totalCostKr, avgPrice: avgPriceKr, totalCost: totalCostKr };
   };
 
   const handleCardClick = (category: CostCategory) => {
