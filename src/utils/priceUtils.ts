@@ -144,7 +144,9 @@ export const formatPrice = (price: number): string => {
 
 // Format time
 export const formatHour = (hour: number): string => {
-  return `${hour.toString().padStart(2, "0")}:00`;
+  // Handle hours >= 24 by wrapping to next day
+  const normalizedHour = hour % 24;
+  return `${normalizedHour.toString().padStart(2, "0")}:00`;
 };
 
 // Check if current hour is in cheap or expensive list

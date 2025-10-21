@@ -8,7 +8,6 @@ import {
 } from "@/utils/priceUtils";
 import PriceTable from "@/components/PriceTable";
 import PriceChart from "@/components/PriceChart";
-import ChargingPlanner from "@/components/ChargingPlanner";
 import CostCalculator from "@/components/CostCalculator";
 import PriceNotification from "@/components/PriceNotification";
 import HeroSection from "@/components/HeroSection";
@@ -121,17 +120,11 @@ const Index = () => {
               date={new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
             />
             
-            {/* Planning Tools */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ChargingPlanner
-                prices={priceData.today}
-                onWindowSelect={setOptimalWindow}
-              />
-              <CostCalculator
-                todayPrices={priceData.today}
-                cheapestWindow={findCheapestWindow(priceData.today, 4)}
-              />
-            </div>
+            {/* Cost Calculator */}
+            <CostCalculator
+              todayPrices={priceData.today}
+              cheapestWindow={findCheapestWindow(priceData.today, 4)}
+            />
           </TabsContent>
 
           {/* Tomorrow Tab */}

@@ -31,11 +31,6 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
     (_, i) => cheapestWindow.startHour + i
   );
 
-  // Get hours from the optimal window (from ChargingPlanner)
-  const optimalHours = optimalWindow ? Array.from(
-    { length: (optimalWindow.endHour - optimalWindow.startHour + 1) },
-    (_, i) => optimalWindow.startHour + i
-  ) : [];
 
   // Average price for the 4 cheapest consecutive hours
   const avgCheapest4 = cheapestWindow.avgPrice;
@@ -58,7 +53,6 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
       hourNum: i,
       pris: hourData ? hourData.price / 100 : 0,
       isCheap: hourData && cheapest4Hours.includes(i), // 4 cheapest consecutive hours
-      isOptimal: hourData && optimalHours.includes(i), // Optimal window from ChargingPlanner
       isSelected: selectedHours.includes(i),
     };
   });
@@ -73,10 +67,9 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
     );
   };
 
-  // Get bar color based on status - priority: selected > optimal > cheap > normal
+  // Get bar color based on status - priority: selected > cheap > normal
   const getBarColor = (entry: any) => {
     if (entry.isSelected) return "hsl(35, 91%, 55%)"; // Orange for manually selected
-    if (entry.isOptimal) return "hsl(280, 70%, 60%)"; // Purple for optimal window from planner
     if (entry.isCheap) return "hsl(var(--price-cheap))"; // Green for 4 cheapest consecutive
     return "hsl(var(--primary) / 0.6)";
   };
@@ -90,11 +83,8 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
           <p className="text-sm font-bold" style={{ color: payload[0].color }}>
             {payload[0].value.toFixed(2)} kr/kWh (inkl. moms)
           </p>
-          {data.isCheap && !data.isOptimal && !data.isSelected && (
+          {data.isCheap && !data.isSelected && (
             <p className="text-xs text-price-cheap mt-1">✓ Bland de 4 billigaste sammanhängande</p>
-          )}
-          {data.isOptimal && !data.isSelected && (
-            <p className="text-xs mt-1" style={{ color: "hsl(280, 70%, 60%)" }}>✓ Valt laddningsfönster</p>
           )}
           {data.isSelected && (
             <p className="text-xs mt-1" style={{ color: "hsl(35, 91%, 55%)" }}>✓ Manuellt vald</p>
@@ -120,14 +110,6 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
             <div className="w-3 h-3 rounded bg-price-cheap"></div>
             <span className="text-muted-foreground">4 billigaste sammanhängande: {(avgCheapest4 / 100).toFixed(2)} kr/kWh</span>
           </div>
-          {optimalWindow && (
-            <div className="flex items-center gap-2 text-xs sm:text-sm">
-              <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(280, 70%, 60%)" }}></div>
-              <span className="text-muted-foreground">
-                Valt laddningsfönster ({optimalWindow.endHour - optimalWindow.startHour + 1}h): {(optimalWindow.avgPrice / 100).toFixed(2)} kr/kWh
-              </span>
-            </div>
-          )}
           {selectedHours.length > 0 && (
             <div className="flex items-center gap-2 text-xs sm:text-sm">
               <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(35, 91%, 55%)" }}></div>
