@@ -55,12 +55,19 @@ const PriceChart = ({ todayPrices, yesterdayPrices, tomorrowPrices, optimalWindo
   // Calculate average price for today
   const avgTodayPrice = todayPrices.reduce((sum, p) => sum + p.price, 0) / todayPrices.length / 100;
 
-  // Calculate average price for selected hours
+  // Calculate average price for selected hours (use the prices being displayed)
   const avgSelectedPrice = selectedHours.length > 0
     ? todayPrices
         .filter(p => selectedHours.includes(p.hour))
         .reduce((sum, p) => sum + p.price, 0) / selectedHours.length / 100
     : null;
+
+  // Debug logging
+  if (selectedHours.length > 0) {
+    console.log('Selected hours:', selectedHours);
+    console.log('Prices for selected hours:', todayPrices.filter(p => selectedHours.includes(p.hour)));
+    console.log('Average:', avgSelectedPrice);
+  }
 
   // Combine data for chart - ensure we have exactly 24 hours (0-23)
   const chartData = Array.from({ length: 24 }, (_, i) => {
