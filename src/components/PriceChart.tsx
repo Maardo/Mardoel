@@ -2,6 +2,8 @@ import { useState } from "react";
 import { HourlyPrice, findCheapestWindow, findCheapestWindowAcrossDays } from "@/utils/priceUtils";
 import { formatHour } from "@/utils/priceUtils";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -184,6 +186,18 @@ const PriceChart = ({ todayPrices, yesterdayPrices, tomorrowPrices, optimalWindo
           )}
         </div>
       </div>
+
+      {/* Alert for cross-midnight windows */}
+      {selectedWindow && selectedWindow.spansToNextDay && (
+        <Alert className="mb-4 border-amber-500/50 bg-amber-500/10">
+          <Info className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-sm">
+            <span className="font-semibold">OBS:</span> Detta laddningsfönster går över midnatt (kl {selectedWindow.startHour.toString().padStart(2, '0')}:00 - {selectedWindow.endHour.toString().padStart(2, '0')}:00 morgondag). 
+            Kolla även <span className="font-semibold">Morgondagens priser</span> för fullständig översikt.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <ResponsiveContainer width="100%" height={300} className="sm:h-[400px]">
         <BarChart data={chartData} margin={{ top: 50, right: 10, left: 0, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
