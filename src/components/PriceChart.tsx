@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HourlyPrice, getCheapestHours } from "@/utils/priceUtils";
+import { HourlyPrice, findCheapestWindow } from "@/utils/priceUtils";
 import { formatHour } from "@/utils/priceUtils";
 import {
   BarChart,
@@ -23,18 +23,15 @@ interface PriceChartProps {
 const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Prisutveckling idag" }: PriceChartProps) => {
   const [selectedHours, setSelectedHours] = useState<number[]>([]);
 
-  // Get the 4 cheapest hours
-  const cheapest4Hours = [...todayPrices]
-    .sort((a, b) => a.price - b.price)
-    .slice(0, 4)
-    .map(p => p.hour);
-
-  // Calculate average price for the 4 cheapest hours
-  const avgCheapest4 = Math.round(
-    todayPrices
-      .filter(p => cheapest4Hours.includes(p.hour))
-      .reduce((sum, p) => sum + p.price, 0) / 4
+  // Get the 4 cheapest consecutive hours
+  const cheapestWindow = findCheapestWindow(todayPrices, 4);
+  const cheapest4Hours = Array.from(
+    { length: 4 }, 
+    (_, i) => cheapestWindow.startHour + i
   );
+
+  // Average price for the 4 cheapest consecutive hours
+  const avgCheapest4 = cheapestWindow.avgPrice;
 
   // Calculate average price for today
   const avgTodayPrice = todayPrices.reduce((sum, p) => sum + p.price, 0) / todayPrices.length / 100;
@@ -85,7 +82,7 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
             {payload[0].value.toFixed(2)} kr/kWh (inkl. moms)
           </p>
           {data.isCheap && (
-            <p className="text-xs text-price-cheap mt-1">✓ Billigaste 4 timmarna</p>
+            <p className="text-xs text-price-cheap mt-1">✓ Bland de 4 billigaste</p>
           )}
           {data.isSelected && !data.isCheap && (
             <p className="text-xs text-accent mt-1">✓ Vald</p>
@@ -101,23 +98,20 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
     <div className="bg-card rounded-lg shadow-card p-6 border border-border">
       <div className="mb-6">
         <h3 className="text-xl font-bold text-foreground mb-3">{title}</h3>
-        <div className="flex flex-col gap-2 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-price-cheap"></div>
-            <span className="text-muted-foreground">Billigaste 4 timmarna (snitt: {(avgCheapest4 / 100).toFixed(2)} kr/kWh)</span>
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-medium text-foreground">
+            Dagens snitt: <span className="text-lg font-bold">{avgTodayPrice.toFixed(2)} kr/kWh</span>
+          </p>
+          <div className="flex items-center gap-2 text-sm">
+            <div className="w-3 h-3 rounded bg-price-cheap"></div>
+            <span className="text-muted-foreground">4 billigaste sammanhängande timmarna: {(avgCheapest4 / 100).toFixed(2)} kr/kWh</span>
           </div>
           {selectedHours.length > 0 && (
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: "hsl(35, 91%, 55%)" }}></div>
-              <span className="text-muted-foreground">({selectedHours.length} {selectedHours.length === 1 ? 'timma' : 'timmar'}, snitt: {avgSelectedPrice?.toFixed(2)} kr/kWh)</span>
+            <div className="flex items-center gap-2 text-sm">
+              <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(35, 91%, 55%)" }}></div>
+              <span className="text-muted-foreground">Valda: ({selectedHours.length} {selectedHours.length === 1 ? 'timma' : 'timmar'}, snitt: {avgSelectedPrice?.toFixed(2)} kr/kWh)</span>
             </div>
           )}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>💡 Klicka på staplar för att beräkna anpassat snitt</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm font-semibold text-foreground mt-1">
-            <span>Dagens snitt: {avgTodayPrice.toFixed(2)} kr/kWh</span>
-          </div>
         </div>
       </div>
       <ResponsiveContainer width="100%" height={400}>
@@ -127,8 +121,10 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
             dataKey="hour"
             stroke="hsl(var(--muted-foreground))"
             tick={{ fontSize: 9 }}
-            interval={1}
-            height={40}
+            interval={0}
+            angle={-45}
+            textAnchor="end"
+            height={60}
           />
           <YAxis
             stroke="hsl(var(--muted-foreground))"

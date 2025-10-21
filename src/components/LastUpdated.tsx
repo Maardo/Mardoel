@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface LastUpdatedProps {
   lastUpdated: string;
@@ -33,15 +31,10 @@ const LastUpdated = ({ lastUpdated, onRefresh }: LastUpdatedProps) => {
   }, [lastUpdated]);
 
   return (
-    <div className="flex items-center justify-between bg-muted rounded-lg p-4">
-      <div>
-        <p className="text-sm text-muted-foreground">Senast uppdaterad</p>
-        <p className="font-semibold text-foreground">{timeAgo}</p>
-      </div>
-      <Button variant="outline" size="sm" onClick={onRefresh}>
-        <RefreshCw className="w-4 h-4 mr-2" />
-        Uppdatera
-      </Button>
+    <div className="bg-muted rounded-lg p-4">
+      <p className="text-sm text-muted-foreground">Senast uppdaterad</p>
+      <p className="font-semibold text-foreground">{timeAgo}</p>
+      <p className="text-xs text-muted-foreground mt-1">Uppdateras automatiskt var 15:e minut</p>
     </div>
   );
 };
