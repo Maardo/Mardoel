@@ -65,24 +65,59 @@ Deno.serve(async (req) => {
     const yesterdayData = yesterdayResponse.ok ? await yesterdayResponse.json() : null;
 
     console.log('Successfully fetched Nord Pool data');
+    console.log('Today data structure:', JSON.stringify(todayData).substring(0, 500));
 
     // Transform the data
     const transformPrices = (data: any): HourlyPrice[] => {
-      if (!data?.multiAreaEntries) {
-        console.warn('No multiAreaEntries in response');
+      // Check different possible data structures
+      let entries = data?.multiAreaEntries || data?.data || [];
+      
+      if (Array.isArray(data)) {
+        entries = data;
+      }
+
+      if (!entries || entries.length === 0) {
+        console.warn('No entries found in response. Data keys:', Object.keys(data || {}));
         return [];
       }
 
-      return data.multiAreaEntries
-        .filter((entry: any) => entry.deliveryArea === 'SE3')
+      console.log(`Processing ${entries.length} entries`);
+      
+      const prices = entries
+        .filter((entry: any) => {
+          // Try different area field names
+          const area = entry.deliveryArea || entry.area || entry.priceArea || entry.Areas;
+          return area === 'SE3' || area?.includes('SE3');
+        })
         .map((entry: any) => {
-          const date = new Date(entry.deliveryStart);
+          // Try different timestamp field names
+          const timestamp = entry.deliveryStart || entry.HourUTC || entry.timestamp || entry.time;
+          const date = new Date(timestamp);
+          
+          // Try different price field names (convert from SEK/MWh to öre/kWh)
+          let priceValue = entry.entryPerArea?.[0]?.spotPrice 
+            || entry.spotPrice 
+            || entry.SpotPriceSEK 
+            || entry.price 
+            || 0;
+            
+          // Nord Pool API returns SEK/MWh, convert to öre/kWh (divide by 10)
+          const price = Math.round(priceValue / 10);
+          
           return {
             hour: date.getHours(),
-            price: Math.round(entry.entryPerArea[0]?.spotPrice || 0), // Price in öre/kWh
+            price: price,
+            timestamp: timestamp,
           };
         })
         .sort((a: HourlyPrice, b: HourlyPrice) => a.hour - b.hour);
+
+      console.log(`Transformed to ${prices.length} prices for SE3`);
+      if (prices.length > 0) {
+        console.log('Sample price:', JSON.stringify(prices[0]));
+      }
+      
+      return prices;
     };
 
     const todayPrices = transformPrices(todayData);
