@@ -104,14 +104,6 @@ const Index = () => {
                 Översikt
               </TabsTrigger>
               <TabsTrigger 
-                value="planning" 
-                className="text-base sm:text-lg h-12 border-2 border-border data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-md"
-              >
-                Planering
-              </TabsTrigger>
-            </TabsList>
-            <TabsList className="grid w-full grid-cols-1 gap-3 h-auto bg-transparent">
-              <TabsTrigger 
                 value="tomorrow" 
                 className="text-base sm:text-lg h-12 border-2 border-border data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-md"
               >
@@ -128,6 +120,18 @@ const Index = () => {
               optimalWindow={optimalWindow}
               date={new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
             />
+            
+            {/* Planning Tools */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ChargingPlanner
+                prices={priceData.today}
+                onWindowSelect={setOptimalWindow}
+              />
+              <CostCalculator
+                todayPrices={priceData.today}
+                cheapestWindow={findCheapestWindow(priceData.today, 4)}
+              />
+            </div>
           </TabsContent>
 
           {/* Tomorrow Tab */}
@@ -147,20 +151,6 @@ const Index = () => {
                 </p>
               </div>
             )}
-          </TabsContent>
-
-          {/* Planning Tab */}
-          <TabsContent value="planning" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ChargingPlanner
-                prices={priceData.today}
-                onWindowSelect={setOptimalWindow}
-              />
-              <CostCalculator
-                todayPrices={priceData.today}
-                cheapestWindow={findCheapestWindow(priceData.today, 4)}
-              />
-            </div>
           </TabsContent>
         </Tabs>
       </main>
