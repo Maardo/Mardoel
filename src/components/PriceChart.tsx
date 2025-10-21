@@ -49,8 +49,8 @@ const PriceChart = ({ todayPrices, yesterdayPrices, tomorrowPrices, optimalWindo
   // Calculate average price for selected window hours
   const avgSelectedWindow = selectedWindow ? selectedWindow.avgPrice / 100 : null;
 
-  // Average price for the 4 cheapest consecutive hours
-  const avgCheapest4 = cheapestWindow.avgPrice;
+  // Average price for the 4 cheapest consecutive hours (convert from öre to kr)
+  const avgCheapest4 = cheapestWindow.avgPrice / 100;
 
   // Calculate average price for today
   const avgTodayPrice = todayPrices.reduce((sum, p) => sum + p.price, 0) / todayPrices.length / 100;
@@ -75,8 +75,10 @@ const PriceChart = ({ todayPrices, yesterdayPrices, tomorrowPrices, optimalWindo
     };
   });
 
-  // Handle bar click
+  // Handle bar click - disable manual selection when a window is selected
   const handleBarClick = (data: any) => {
+    if (selectedHourWindow) return; // Don't allow manual selection when a window is active
+    
     const hourNum = data.hourNum;
     setSelectedHours(prev => 
       prev.includes(hourNum) 
@@ -133,7 +135,10 @@ const PriceChart = ({ todayPrices, yesterdayPrices, tomorrowPrices, optimalWindo
                 key={hours}
                 size="sm"
                 variant={selectedHourWindow === hours ? "default" : "outline"}
-                onClick={() => setSelectedHourWindow(selectedHourWindow === hours ? null : hours)}
+                onClick={() => {
+                  setSelectedHourWindow(selectedHourWindow === hours ? null : hours);
+                  setSelectedHours([]); // Clear manually selected hours when clicking a button
+                }}
                 className="h-8 px-3 text-xs font-semibold"
                 style={selectedHourWindow === hours ? { 
                   backgroundColor: "hsl(0, 84%, 60%)", 
@@ -153,7 +158,7 @@ const PriceChart = ({ todayPrices, yesterdayPrices, tomorrowPrices, optimalWindo
           </p>
           <div className="flex items-center gap-2 text-xs sm:text-sm">
             <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}></div>
-            <span className="text-muted-foreground">4 billigaste sammanhängande: {(avgCheapest4 / 100).toFixed(2)} kr/kWh</span>
+            <span className="text-muted-foreground">4 billigaste sammanhängande: {avgCheapest4.toFixed(2)} kr/kWh</span>
           </div>
           {selectedWindow && avgSelectedWindow && (
             <div className="flex items-center gap-2 text-xs sm:text-sm">
