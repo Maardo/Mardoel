@@ -45,14 +45,17 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartP
         .reduce((sum, p) => sum + p.price, 0) / selectedHours.length / 100
     : null;
 
-  // Combine data for chart
-  const chartData = todayPrices.map((today) => ({
-    hour: `${today.hour.toString().padStart(2, '0')}:00`,
-    hourNum: today.hour,
-    pris: today.price / 100, // Convert to kr (inkl. moms)
-    isCheap: cheapest4Hours.includes(today.hour),
-    isSelected: selectedHours.includes(today.hour),
-  }));
+  // Combine data for chart - ensure we have exactly 24 hours (0-23)
+  const chartData = Array.from({ length: 24 }, (_, i) => {
+    const hourData = todayPrices.find(p => p.hour === i);
+    return {
+      hour: `${i.toString().padStart(2, '0')}:00`,
+      hourNum: i,
+      pris: hourData ? hourData.price / 100 : 0,
+      isCheap: cheapest4Hours.includes(i),
+      isSelected: selectedHours.includes(i),
+    };
+  });
 
   // Handle bar click
   const handleBarClick = (data: any) => {
@@ -113,24 +116,25 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartP
           </div>
         </div>
       </div>
-      <ResponsiveContainer width="100%" height={400}>
-        <BarChart data={chartData} margin={{ top: 20, right: 40, left: 20, bottom: 30 }}>
+      <ResponsiveContainer width="100%" height={450}>
+        <BarChart data={chartData} margin={{ top: 30, right: 60, left: 10, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
           <XAxis
             dataKey="hour"
             stroke="hsl(var(--muted-foreground))"
-            tick={{ fontSize: 11 }}
-            interval={1}
+            tick={{ fontSize: 10 }}
+            interval={0}
+            height={40}
           />
           <YAxis
             stroke="hsl(var(--muted-foreground))"
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 11 }}
             domain={[0, 'auto']}
             label={{
-              value: "kr/kWh (inkl. moms)",
+              value: "kr/kWh",
               angle: -90,
               position: "insideLeft",
-              style: { fontSize: 12, fill: "hsl(var(--muted-foreground))" },
+              style: { fontSize: 11, fill: "hsl(var(--muted-foreground))" },
             }}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: "hsl(var(--accent) / 0.2)" }} />
@@ -138,18 +142,20 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartP
             y={avgTodayPrice} 
             stroke="hsl(var(--primary))" 
             strokeDasharray="5 5"
-            strokeWidth={2}
+            strokeWidth={2.5}
             label={{ 
-              value: `Dagens snitt: ${avgTodayPrice.toFixed(2)} kr/kWh`, 
+              value: `Dagens snitt: ${avgTodayPrice.toFixed(2)} kr`, 
               position: "right",
-              fill: "hsl(var(--muted-foreground))",
-              fontSize: 12
+              fill: "hsl(var(--foreground))",
+              fontSize: 13,
+              fontWeight: 600,
+              offset: 10
             }}
           />
           <Bar 
             dataKey="pris" 
-            radius={[6, 6, 0, 0]} 
-            maxBarSize={50}
+            radius={[4, 4, 0, 0]} 
+            maxBarSize={40}
             onClick={handleBarClick}
             cursor="pointer"
           >
