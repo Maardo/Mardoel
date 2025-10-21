@@ -1,14 +1,15 @@
 import { HourlyPrice, getCheapestHours } from "@/utils/priceUtils";
 import { formatHour } from "@/utils/priceUtils";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
+  ReferenceLine,
+  Dot,
 } from "recharts";
 
 interface PriceChartProps {
@@ -31,9 +32,12 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartP
       .reduce((sum, p) => sum + p.price, 0) / 4
   );
 
+  // Calculate average price for today
+  const avgTodayPrice = todayPrices.reduce((sum, p) => sum + p.price, 0) / todayPrices.length / 100;
+
   // Combine data for chart
   const chartData = todayPrices.map((today) => ({
-    hour: `${today.hour.toString().padStart(2, '0')}:00 - ${today.hour.toString().padStart(2, '0')}:30`,
+    hour: `${today.hour.toString().padStart(2, '0')}:00`,
     hourNum: today.hour,
     pris: today.price / 100, // Convert to kr (inkl. moms)
     isCheap: cheapest4Hours.includes(today.hour),
@@ -69,11 +73,16 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartP
         </div>
       </div>
       <ResponsiveContainer width="100%" height={350}>
-        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+        <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 40 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis
             dataKey="hour"
-            hide={true}
+            stroke="hsl(var(--muted-foreground))"
+            tick={{ fontSize: 11 }}
+            interval={0}
+            angle={-45}
+            textAnchor="end"
+            height={60}
           />
           <YAxis
             stroke="hsl(var(--muted-foreground))"
@@ -85,16 +94,39 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartP
               style: { fontSize: 12, fill: "hsl(var(--muted-foreground))" },
             }}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: "hsl(var(--accent) / 0.3)" }} />
-          <Bar dataKey="pris" radius={[8, 8, 0, 0]} maxBarSize={40}>
-            {chartData.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={entry.isCheap ? "hsl(var(--price-cheap))" : "hsl(var(--primary))"}
-              />
-            ))}
-          </Bar>
-        </BarChart>
+          <Tooltip content={<CustomTooltip />} />
+          <ReferenceLine 
+            y={avgTodayPrice} 
+            stroke="hsl(var(--primary))" 
+            strokeDasharray="5 5"
+            strokeWidth={2}
+            label={{ 
+              value: `Snitt: ${avgTodayPrice.toFixed(2)} kr/kWh`, 
+              position: "right",
+              fill: "hsl(var(--muted-foreground))",
+              fontSize: 12
+            }}
+          />
+          <Line 
+            type="monotone" 
+            dataKey="pris" 
+            stroke="hsl(var(--primary))" 
+            strokeWidth={2}
+            dot={(props: any) => {
+              const { cx, cy, payload } = props;
+              return (
+                <Dot
+                  cx={cx}
+                  cy={cy}
+                  r={payload.isCheap ? 5 : 3}
+                  fill={payload.isCheap ? "hsl(var(--price-cheap))" : "hsl(var(--primary))"}
+                  stroke="white"
+                  strokeWidth={1}
+                />
+              );
+            }}
+          />
+        </LineChart>
       </ResponsiveContainer>
     </div>
   );
