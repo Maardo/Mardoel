@@ -112,6 +112,43 @@ export const findCheapestWindow = (
   };
 };
 
+// Find the cheapest consecutive hours window across two days
+export const findCheapestWindowAcrossDays = (
+  todayPrices: HourlyPrice[],
+  tomorrowPrices: HourlyPrice[],
+  windowSize: number
+): { startHour: number; endHour: number; avgPrice: number; spansToNextDay: boolean } => {
+  // Combine prices - add 24 to tomorrow's hours to make them sequential
+  const combinedPrices = [
+    ...todayPrices.map(p => ({ ...p, originalHour: p.hour })),
+    ...tomorrowPrices.map(p => ({ ...p, hour: p.hour + 24, originalHour: p.hour }))
+  ];
+  
+  let cheapestSum = Infinity;
+  let cheapestStart = 0;
+
+  // Find the cheapest window in the combined array
+  for (let i = 0; i <= combinedPrices.length - windowSize; i++) {
+    const windowSum = combinedPrices
+      .slice(i, i + windowSize)
+      .reduce((sum, p) => sum + p.price, 0);
+    if (windowSum < cheapestSum) {
+      cheapestSum = windowSum;
+      cheapestStart = combinedPrices[i].hour; // This could be 0-47
+    }
+  }
+
+  const endHour = cheapestStart + windowSize - 1;
+  const spansToNextDay = endHour >= 24;
+
+  return {
+    startHour: cheapestStart,
+    endHour: endHour,
+    avgPrice: Math.round(cheapestSum / windowSize),
+    spansToNextDay
+  };
+};
+
 // Get the 3 cheapest hours
 export const getCheapestHours = (prices: HourlyPrice[]): number[] => {
   return [...prices]

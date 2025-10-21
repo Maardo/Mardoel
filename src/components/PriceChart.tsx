@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HourlyPrice, findCheapestWindow } from "@/utils/priceUtils";
+import { HourlyPrice, findCheapestWindow, findCheapestWindowAcrossDays } from "@/utils/priceUtils";
 import { formatHour } from "@/utils/priceUtils";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,12 +17,13 @@ import {
 interface PriceChartProps {
   todayPrices: HourlyPrice[];
   yesterdayPrices: HourlyPrice[];
+  tomorrowPrices?: HourlyPrice[];
   optimalWindow?: { startHour: number; endHour: number; avgPrice: number };
   title?: string;
   date?: string;
 }
 
-const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Prisutveckling idag", date }: PriceChartProps) => {
+const PriceChart = ({ todayPrices, yesterdayPrices, tomorrowPrices, optimalWindow, title = "Prisutveckling idag", date }: PriceChartProps) => {
   const [selectedHours, setSelectedHours] = useState<number[]>([]);
   const [selectedHourWindow, setSelectedHourWindow] = useState<number | null>(null);
 
@@ -33,14 +34,20 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
     (_, i) => (cheapestWindow.startHour + i) % 24 // Handle wrap-around at midnight
   );
 
-  // Get the selected hour window (dynamic purple)
-  const selectedWindow = selectedHourWindow 
-    ? findCheapestWindow(todayPrices, selectedHourWindow)
+  // Get the selected hour window (dynamic red) - can span across days
+  const selectedWindow = selectedHourWindow && tomorrowPrices
+    ? findCheapestWindowAcrossDays(todayPrices, tomorrowPrices, selectedHourWindow)
+    : selectedHourWindow 
+    ? { ...findCheapestWindow(todayPrices, selectedHourWindow), spansToNextDay: false }
     : null;
+  
   const selectedWindowHours = selectedWindow ? Array.from(
     { length: selectedHourWindow! },
     (_, i) => (selectedWindow.startHour + i) % 24 // Handle wrap-around at midnight
   ) : [];
+  
+  // Calculate average price for selected window hours
+  const avgSelectedWindow = selectedWindow ? selectedWindow.avgPrice / 100 : null;
 
   // Average price for the 4 cheapest consecutive hours
   const avgCheapest4 = cheapestWindow.avgPrice;
@@ -148,11 +155,12 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
             <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}></div>
             <span className="text-muted-foreground">4 billigaste sammanhängande: {(avgCheapest4 / 100).toFixed(2)} kr/kWh</span>
           </div>
-          {selectedWindow && (
+          {selectedWindow && avgSelectedWindow && (
             <div className="flex items-center gap-2 text-xs sm:text-sm">
               <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(0, 84%, 60%)" }}></div>
               <span className="text-muted-foreground">
-                Valt laddningsfönster ({selectedHourWindow}h): {(selectedWindow.avgPrice / 100).toFixed(2)} kr/kWh
+                Valt laddningsfönster ({selectedHourWindow}h): {avgSelectedWindow.toFixed(2)} kr/kWh
+                {selectedWindow.spansToNextDay && " (sträcker till nästa dag)"}
               </span>
             </div>
           )}

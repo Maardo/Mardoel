@@ -116,6 +116,7 @@ const Index = () => {
             <PriceChart
               todayPrices={priceData.today}
               yesterdayPrices={priceData.yesterday}
+              tomorrowPrices={priceData.tomorrow}
               optimalWindow={optimalWindow}
               date={new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
             />
@@ -128,6 +129,7 @@ const Index = () => {
               <PriceChart
                 todayPrices={priceData.tomorrow}
                 yesterdayPrices={priceData.today}
+                tomorrowPrices={undefined}
                 optimalWindow={findCheapestWindow(priceData.tomorrow, 4)}
                 title="Prisutveckling imorgon"
                 date={new Date(new Date().setDate(new Date().getDate() + 1)).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
