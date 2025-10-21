@@ -17,9 +17,10 @@ interface PriceChartProps {
   todayPrices: HourlyPrice[];
   yesterdayPrices: HourlyPrice[];
   optimalWindow?: { startHour: number; endHour: number; avgPrice: number };
+  title?: string;
 }
 
-const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartProps) => {
+const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Prisutveckling idag" }: PriceChartProps) => {
   const [selectedHours, setSelectedHours] = useState<number[]>([]);
 
   // Get the 4 cheapest hours
@@ -67,10 +68,10 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartP
     );
   };
 
-  // Get bar color based on status
+  // Get bar color based on status - selected always takes priority
   const getBarColor = (entry: any) => {
+    if (entry.isSelected) return "hsl(var(--accent))"; // Selected is blue, even if cheap
     if (entry.isCheap) return "hsl(var(--price-cheap))";
-    if (entry.isSelected) return "hsl(var(--accent))";
     return "hsl(var(--primary) / 0.6)";
   };
 
@@ -99,7 +100,7 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartP
   return (
     <div className="bg-card rounded-lg shadow-card p-6 border border-border">
       <div className="mb-6">
-        <h3 className="text-xl font-bold text-foreground mb-3">Prisutveckling idag</h3>
+        <h3 className="text-xl font-bold text-foreground mb-3">{title}</h3>
         <div className="flex flex-col gap-2 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-price-cheap"></div>
@@ -117,7 +118,7 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartP
         </div>
       </div>
       <ResponsiveContainer width="100%" height={450}>
-        <BarChart data={chartData} margin={{ top: 30, right: 60, left: 10, bottom: 5 }}>
+        <BarChart data={chartData} margin={{ top: 50, right: 20, left: 10, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
           <XAxis
             dataKey="hour"
@@ -144,12 +145,11 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartP
             strokeDasharray="5 5"
             strokeWidth={2.5}
             label={{ 
-              value: `Dagens snitt: ${avgTodayPrice.toFixed(2)} kr`, 
-              position: "right",
+              value: `Snitt: ${avgTodayPrice.toFixed(2)} kr/kWh`, 
+              position: "top",
               fill: "hsl(var(--foreground))",
-              fontSize: 13,
-              fontWeight: 600,
-              offset: 10
+              fontSize: 12,
+              fontWeight: 600
             }}
           />
           <Bar 

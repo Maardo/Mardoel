@@ -13,6 +13,7 @@ export const VAT_RATE = 1.25;
 export interface PriceData {
   today: HourlyPrice[];
   yesterday: HourlyPrice[];
+  tomorrow?: HourlyPrice[];
   lastUpdated: string;
 }
 
@@ -31,6 +32,7 @@ export const fetchPriceData = async (): Promise<PriceData> => {
     return {
       today: data.today.map((p: HourlyPrice) => ({ ...p, price: Math.round(p.price * VAT_RATE) })),
       yesterday: data.yesterday.map((p: HourlyPrice) => ({ ...p, price: Math.round(p.price * VAT_RATE) })),
+      tomorrow: data.tomorrow ? data.tomorrow.map((p: HourlyPrice) => ({ ...p, price: Math.round(p.price * VAT_RATE) })) : undefined,
       lastUpdated: data.lastUpdated,
     };
   } catch (error) {
@@ -53,9 +55,16 @@ export const generateMockPriceData = (): PriceData => {
     timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, i).toISOString(),
   }));
 
+  const tomorrow = Array.from({ length: 24 }, (_, i) => ({
+    hour: i,
+    price: Math.round((55 + Math.random() * 145 + Math.sin(i / 3) * 48) * VAT_RATE), // Include VAT
+    timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, i).toISOString(),
+  }));
+
   return {
     today,
     yesterday,
+    tomorrow,
     lastUpdated: now.toISOString(),
   };
 };

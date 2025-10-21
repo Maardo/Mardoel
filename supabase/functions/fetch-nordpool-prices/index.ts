@@ -34,20 +34,30 @@ Deno.serve(async (req) => {
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
 
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
     // Using Elpriset Just Nu API - free and reliable for Swedish electricity prices
     const todayUrl = `https://www.elprisetjustnu.se/api/v1/prices/${todayStr.split('-')[0]}/${todayStr.split('-')[1]}-${todayStr.split('-')[2]}_SE3.json`;
     const yesterdayUrl = `https://www.elprisetjustnu.se/api/v1/prices/${yesterdayStr.split('-')[0]}/${yesterdayStr.split('-')[1]}-${yesterdayStr.split('-')[2]}_SE3.json`;
+    const tomorrowUrl = `https://www.elprisetjustnu.se/api/v1/prices/${tomorrowStr.split('-')[0]}/${tomorrowStr.split('-')[1]}-${tomorrowStr.split('-')[2]}_SE3.json`;
 
     console.log('Fetching from:', todayUrl);
 
-    // Fetch both in parallel
-    const [todayResponse, yesterdayResponse] = await Promise.all([
+    // Fetch all in parallel
+    const [todayResponse, yesterdayResponse, tomorrowResponse] = await Promise.all([
       fetch(todayUrl, {
         headers: {
           'Accept': 'application/json',
         }
       }),
       fetch(yesterdayUrl, {
+        headers: {
+          'Accept': 'application/json',
+        }
+      }),
+      fetch(tomorrowUrl, {
         headers: {
           'Accept': 'application/json',
         }
@@ -61,9 +71,11 @@ Deno.serve(async (req) => {
 
     const todayData = await todayResponse.json();
     const yesterdayData = yesterdayResponse.ok ? await yesterdayResponse.json() : null;
+    const tomorrowData = tomorrowResponse.ok ? await tomorrowResponse.json() : null;
 
     console.log('Successfully fetched price data');
     console.log(`Today: ${todayData?.length || 0} prices`);
+    console.log(`Tomorrow: ${tomorrowData?.length || 0} prices`);
 
     // Transform the data
     const transformPrices = (data: any[]): HourlyPrice[] => {
@@ -89,6 +101,7 @@ Deno.serve(async (req) => {
 
     const todayPrices = transformPrices(todayData);
     const yesterdayPrices = yesterdayData ? transformPrices(yesterdayData) : [];
+    const tomorrowPrices = tomorrowData ? transformPrices(tomorrowData) : null;
 
     // Fallback if no data
     if (todayPrices.length === 0) {
@@ -99,10 +112,11 @@ Deno.serve(async (req) => {
     const response = {
       today: todayPrices,
       yesterday: yesterdayPrices,
+      tomorrow: tomorrowPrices,
       lastUpdated: new Date().toISOString(),
     };
 
-    console.log(`Returning ${todayPrices.length} today prices and ${yesterdayPrices.length} yesterday prices`);
+    console.log(`Returning ${todayPrices.length} today prices, ${yesterdayPrices.length} yesterday prices, and ${tomorrowPrices?.length || 0} tomorrow prices`);
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

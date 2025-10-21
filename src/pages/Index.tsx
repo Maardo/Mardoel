@@ -97,8 +97,9 @@ const Index = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6 h-14">
+          <TabsList className="grid w-full grid-cols-3 mb-6 h-14">
             <TabsTrigger value="overview" className="text-lg">Översikt</TabsTrigger>
+            <TabsTrigger value="tomorrow" className="text-lg">Morgondagens priser</TabsTrigger>
             <TabsTrigger value="planning" className="text-lg">Planering</TabsTrigger>
           </TabsList>
 
@@ -109,6 +110,24 @@ const Index = () => {
               yesterdayPrices={priceData.yesterday}
               optimalWindow={optimalWindow}
             />
+          </TabsContent>
+
+          {/* Tomorrow Tab */}
+          <TabsContent value="tomorrow" className="space-y-6">
+            {priceData.tomorrow && priceData.tomorrow.length > 0 ? (
+              <PriceChart
+                todayPrices={priceData.tomorrow}
+                yesterdayPrices={priceData.today}
+                optimalWindow={findCheapestWindow(priceData.tomorrow, 4)}
+                title="Prisutveckling imorgon"
+              />
+            ) : (
+              <div className="bg-card rounded-lg shadow-card p-8 border border-border text-center">
+                <p className="text-muted-foreground">
+                  Morgondagens priser är inte tillgängliga än. De publiceras vanligtvis runt kl 13:00.
+                </p>
+              </div>
+            )}
           </TabsContent>
 
           {/* Planning Tab */}
