@@ -18,6 +18,26 @@ export interface PriceData {
 }
 
 // Mock data generator - replace with actual API call to Node.js proxy
+// Helper function to aggregate multiple price points per hour into a single average
+const aggregateHourlyPrices = (prices: HourlyPrice[]): HourlyPrice[] => {
+  const hourMap = new Map<number, { sum: number; count: number; timestamp: string }>();
+  
+  prices.forEach(p => {
+    if (!hourMap.has(p.hour)) {
+      hourMap.set(p.hour, { sum: 0, count: 0, timestamp: p.timestamp });
+    }
+    const hourData = hourMap.get(p.hour)!;
+    hourData.sum += p.price;
+    hourData.count += 1;
+  });
+  
+  return Array.from(hourMap.entries()).map(([hour, data]) => ({
+    hour,
+    price: Math.round(data.sum / data.count), // Average price for the hour
+    timestamp: data.timestamp
+  }));
+};
+
 // Fetch live price data from backend
 export const fetchPriceData = async (): Promise<PriceData> => {
   try {
@@ -28,11 +48,11 @@ export const fetchPriceData = async (): Promise<PriceData> => {
       throw error;
     }
     
-    // Add VAT to all prices
+    // Add VAT to all prices and aggregate multiple prices per hour
     return {
-      today: data.today.map((p: HourlyPrice) => ({ ...p, price: Math.round(p.price * VAT_RATE) })),
-      yesterday: data.yesterday.map((p: HourlyPrice) => ({ ...p, price: Math.round(p.price * VAT_RATE) })),
-      tomorrow: data.tomorrow ? data.tomorrow.map((p: HourlyPrice) => ({ ...p, price: Math.round(p.price * VAT_RATE) })) : undefined,
+      today: aggregateHourlyPrices(data.today.map((p: HourlyPrice) => ({ ...p, price: Math.round(p.price * VAT_RATE) }))),
+      yesterday: aggregateHourlyPrices(data.yesterday.map((p: HourlyPrice) => ({ ...p, price: Math.round(p.price * VAT_RATE) }))),
+      tomorrow: data.tomorrow ? aggregateHourlyPrices(data.tomorrow.map((p: HourlyPrice) => ({ ...p, price: Math.round(p.price * VAT_RATE) }))) : undefined,
       lastUpdated: data.lastUpdated,
     };
   } catch (error) {
