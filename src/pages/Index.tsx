@@ -65,13 +65,13 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-gradient-hero text-primary-foreground py-6 shadow-elegant">
+      <header className="bg-gradient-hero text-primary-foreground py-4 sm:py-6 shadow-elegant">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-3">
-            <Zap className="w-8 h-8" />
+            <Zap className="w-6 h-6 sm:w-8 sm:h-8" />
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Elpriser SE3</h1>
-              <p className="text-sm text-primary-foreground/80">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Elpriser SE3</h1>
+              <p className="text-xs sm:text-sm text-primary-foreground/90">
                 Aktuella elpriser och smart laddningsplanering
               </p>
             </div>
@@ -88,7 +88,7 @@ const Index = () => {
       />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Price Notification */}
         <PriceNotification prices={priceData.today} />
 
@@ -97,10 +97,25 @@ const Index = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 h-14">
-            <TabsTrigger value="overview" className="text-lg">Översikt</TabsTrigger>
-            <TabsTrigger value="tomorrow" className="text-lg">Morgondagens priser</TabsTrigger>
-            <TabsTrigger value="planning" className="text-lg">Planering</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 gap-3 mb-6 h-auto bg-transparent">
+            <TabsTrigger 
+              value="overview" 
+              className="text-base sm:text-lg h-12 border-2 border-border data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-md"
+            >
+              Översikt
+            </TabsTrigger>
+            <TabsTrigger 
+              value="planning" 
+              className="text-base sm:text-lg h-12 border-2 border-border data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-md"
+            >
+              Planering
+            </TabsTrigger>
+            <TabsTrigger 
+              value="tomorrow" 
+              className="text-base sm:text-lg h-12 border-2 border-border data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-md"
+            >
+              Morgondagens priser
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}

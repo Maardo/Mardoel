@@ -53,7 +53,7 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
       hour: `${i.toString().padStart(2, '0')}:00`,
       hourNum: i,
       pris: hourData ? hourData.price / 100 : 0,
-      isCheap: cheapest4Hours.includes(i),
+      isCheap: hourData && cheapest4Hours.includes(i), // Only mark as cheap if hour has data
       isSelected: selectedHours.includes(i),
     };
   });
@@ -115,16 +115,19 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>💡 Klicka på staplar för att beräkna anpassat snitt</span>
           </div>
+          <div className="flex items-center gap-2 text-sm font-semibold text-foreground mt-1">
+            <span>Dagens snitt: {avgTodayPrice.toFixed(2)} kr/kWh</span>
+          </div>
         </div>
       </div>
-      <ResponsiveContainer width="100%" height={450}>
-        <BarChart data={chartData} margin={{ top: 50, right: 20, left: 10, bottom: 5 }}>
+      <ResponsiveContainer width="100%" height={400}>
+        <BarChart data={chartData} margin={{ top: 50, right: 10, left: 0, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
           <XAxis
             dataKey="hour"
             stroke="hsl(var(--muted-foreground))"
-            tick={{ fontSize: 10 }}
-            interval={0}
+            tick={{ fontSize: 9 }}
+            interval={1}
             height={40}
           />
           <YAxis
