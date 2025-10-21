@@ -96,38 +96,38 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow, title = "Pris
   };
 
   return (
-    <div className="bg-card rounded-lg shadow-card p-6 border border-border">
-      <div className="mb-6">
-        <h3 className="text-xl font-bold text-foreground mb-3">
-          {title} {date && <span className="text-muted-foreground">({date})</span>}
+    <div className="bg-card rounded-lg shadow-card p-3 sm:p-4 lg:p-6 border border-border">
+      <div className="mb-4 sm:mb-6">
+        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-3">
+          {title} {date && <span className="text-sm sm:text-base text-muted-foreground">({date})</span>}
         </h3>
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-foreground">
-            Dagens snitt: <span className="text-lg font-bold">{avgTodayPrice.toFixed(2)} kr/kWh</span>
+        <div className="flex flex-col gap-1 sm:gap-2">
+          <p className="text-xs sm:text-sm font-medium text-foreground">
+            Dagens snitt: <span className="text-base sm:text-lg font-bold">{avgTodayPrice.toFixed(2)} kr/kWh</span>
           </p>
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-xs sm:text-sm">
             <div className="w-3 h-3 rounded bg-price-cheap"></div>
             <span className="text-muted-foreground">4 billigaste sammanhängande timmarna: {(avgCheapest4 / 100).toFixed(2)} kr/kWh</span>
           </div>
           {selectedHours.length > 0 && (
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
               <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(35, 91%, 55%)" }}></div>
               <span className="text-muted-foreground">Valda: ({selectedHours.length} {selectedHours.length === 1 ? 'timma' : 'timmar'}, snitt: {avgSelectedPrice?.toFixed(2)} kr/kWh)</span>
             </div>
           )}
         </div>
       </div>
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={300} className="sm:h-[400px]">
         <BarChart data={chartData} margin={{ top: 50, right: 10, left: 0, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
           <XAxis
             dataKey="hour"
             stroke="hsl(var(--muted-foreground))"
-            tick={{ fontSize: 9 }}
+            tick={{ fontSize: 8 }}
             interval={0}
             angle={-45}
             textAnchor="end"
-            height={60}
+            height={70}
           />
           <YAxis
             stroke="hsl(var(--muted-foreground))"

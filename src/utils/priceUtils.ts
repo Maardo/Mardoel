@@ -89,16 +89,19 @@ export const findCheapestWindow = (
   prices: HourlyPrice[],
   windowSize: number
 ): { startHour: number; endHour: number; avgPrice: number } => {
+  // Sort prices by hour to ensure correct order
+  const sortedPrices = [...prices].sort((a, b) => a.hour - b.hour);
+  
   let cheapestSum = Infinity;
   let cheapestStart = 0;
 
-  for (let i = 0; i <= 24 - windowSize; i++) {
-    const windowSum = prices
+  for (let i = 0; i <= sortedPrices.length - windowSize; i++) {
+    const windowSum = sortedPrices
       .slice(i, i + windowSize)
       .reduce((sum, p) => sum + p.price, 0);
     if (windowSum < cheapestSum) {
       cheapestSum = windowSum;
-      cheapestStart = i;
+      cheapestStart = sortedPrices[i].hour; // Use actual hour, not index
     }
   }
 

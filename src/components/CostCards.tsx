@@ -109,7 +109,7 @@ const CostCards = ({ prices }: CostCardsProps) => {
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {categories.map((category) => {
           const Icon = category.icon;
           const minCost = calculateCost(category.kWhMin).cost;
@@ -122,16 +122,16 @@ const CostCards = ({ prices }: CostCardsProps) => {
             <button
               key={category.id}
               onClick={() => handleCardClick(category)}
-              className="bg-card rounded-lg shadow-card p-6 border border-border hover:shadow-elegant transition-all hover:scale-105 cursor-pointer text-center"
+              className="bg-card rounded-lg shadow-card p-3 sm:p-4 lg:p-6 border border-border hover:shadow-elegant transition-all hover:scale-105 cursor-pointer text-center"
             >
-              <Icon className="w-12 h-12 mx-auto mb-3 text-primary" />
-              <h4 className="font-semibold text-foreground mb-1 text-sm">
+              <Icon className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 mx-auto mb-2 sm:mb-3 text-primary" />
+              <h4 className="font-semibold text-foreground mb-1 text-xs sm:text-sm">
                 {category.name}
               </h4>
-              <p className="text-xs text-muted-foreground mb-2">
+              <p className="text-[10px] sm:text-xs text-muted-foreground mb-1 sm:mb-2">
                 ({category.kWhRange})
               </p>
-              <p className="text-lg font-bold text-primary">
+              <p className="text-sm sm:text-base lg:text-lg font-bold text-primary">
                 {costText}
               </p>
             </button>
