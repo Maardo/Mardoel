@@ -33,7 +33,7 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartP
 
   // Combine data for chart
   const chartData = todayPrices.map((today) => ({
-    hour: formatHour(today.hour),
+    hour: `${today.hour.toString().padStart(2, '0')}:00 - ${today.hour.toString().padStart(2, '0')}:30`,
     hourNum: today.hour,
     pris: today.price / 100, // Convert to kr (inkl. moms)
     isCheap: cheapest4Hours.includes(today.hour),
@@ -69,16 +69,11 @@ const PriceChart = ({ todayPrices, yesterdayPrices, optimalWindow }: PriceChartP
         </div>
       </div>
       <ResponsiveContainer width="100%" height={350}>
-        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
           <XAxis
             dataKey="hour"
-            stroke="hsl(var(--muted-foreground))"
-            tick={{ fontSize: 11 }}
-            interval={0}
-            angle={-45}
-            textAnchor="end"
-            height={80}
+            hide={true}
           />
           <YAxis
             stroke="hsl(var(--muted-foreground))"
