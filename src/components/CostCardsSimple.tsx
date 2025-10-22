@@ -24,7 +24,7 @@ interface CostCategory {
 
 const categories: CostCategory[] = [
   { id: "car", name: "Ladda bilen", icon: Car, kWhRange: [10, 100], hours: 6 },
-  { id: "laundry", name: "Tvättmaskin", icon: WashingMachine, kWhRange: [1, 2], hours: 2 },
+  { id: "laundry", name: "Tvättmaskin/Torktumlare", icon: WashingMachine, kWhRange: [1, 2], hours: 3 },
   { id: "dishwasher", name: "Diskmaskin", icon: UtensilsCrossed, kWhRange: [1, 2], hours: 2 },
   { id: "oven", name: "Ugn", icon: Flame, kWhRange: [2, 3], hours: 1 },
   { id: "bath", name: "Ett bad", icon: Bath, kWhRange: [3, 5], hours: 1 },
