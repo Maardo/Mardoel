@@ -164,22 +164,22 @@ const PriceChart = ({
   }
 
   return (
-    <div className="bg-card rounded-lg shadow-card p-3 sm:p-4 lg:p-6 border border-border">
-      <div className="mb-4 sm:mb-6">
+    <div className="bg-card rounded-lg shadow-card p-2 sm:p-3 lg:p-6 border border-border">
+      <div className="mb-3 sm:mb-4 lg:mb-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-foreground">
+            <h3 className="text-base sm:text-lg lg:text-xl font-bold text-foreground">
               Elpriser kommande 24 timmar
             </h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">{subtitle}</p>
+            <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground mt-1">{subtitle}</p>
             {!hasNextDayData && (
-              <p className="text-xs text-muted-foreground/70 mt-1 italic">
+              <p className="text-[10px] sm:text-xs text-muted-foreground/70 mt-1 italic hidden sm:block">
                 När morgondagens priser inte finns än (före ~13:00), visar den dagens återstående timmar. När morgondagens priser finns tillgängliga kommer den visa alla 24 timmar framåt.
               </p>
             )}
             {!hasNextDayData && (
-              <div className="mt-2 flex items-start gap-2 text-xs text-muted-foreground/70 bg-muted/30 p-2 rounded-md">
-                <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <div className="mt-2 flex items-start gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground/70 bg-muted/30 p-1.5 sm:p-2 rounded-md">
+                <Info className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
                 <p>
                   Morgondagens elpriser publiceras normalt mellan 13:00-14:00. 
                   När de finns tillgängliga kommer alla 24 timmar att visas i grafen.
@@ -224,24 +224,24 @@ const PriceChart = ({
         </div>
         
         <div className="flex flex-col gap-1 sm:gap-2">
-          <p className="text-xs sm:text-sm font-medium text-foreground">
-            Snitt 24h: <span className="text-base sm:text-lg font-bold">{avgRollingPrice.toFixed(2)} kr/kWh</span>
+          <p className="text-[10px] sm:text-xs lg:text-sm font-medium text-foreground">
+            Snitt 24h: <span className="text-sm sm:text-base lg:text-lg font-bold">{avgRollingPrice.toFixed(2)} kr/kWh</span>
           </p>
-          <div className="flex items-center gap-2 text-xs sm:text-sm">
-            <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}></div>
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs lg:text-sm">
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}></div>
             <span className="text-muted-foreground">4 billigaste sammanhängande: {avgCheapest4.toFixed(2)} kr/kWh</span>
           </div>
           {selectedWindow && avgSelectedWindow && (
-            <div className="flex items-center gap-2 text-xs sm:text-sm">
-              <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(0, 84%, 60%)" }}></div>
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs lg:text-sm">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded" style={{ backgroundColor: "hsl(0, 84%, 60%)" }}></div>
               <span className="text-muted-foreground">
                 Valt laddningsfönster ({selectedHourWindow}h): {avgSelectedWindow.toFixed(2)} kr/kWh
               </span>
             </div>
           )}
           {selectedHours.length > 0 && (
-            <div className="flex items-center gap-2 text-xs sm:text-sm">
-              <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(48, 100%, 50%)" }}></div>
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs lg:text-sm">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded" style={{ backgroundColor: "hsl(48, 100%, 50%)" }}></div>
               <span className="text-muted-foreground">Manuellt valda: ({selectedHours.length}h, snitt: {avgSelectedPrice?.toFixed(2)} kr/kWh)</span>
             </div>
           )}
@@ -249,7 +249,7 @@ const PriceChart = ({
       </div>
 
 
-      <ResponsiveContainer width="100%" height={300} className="sm:h-[400px]">
+      <ResponsiveContainer width="100%" height={250} className="sm:h-[350px] lg:h-[400px]">
         <BarChart data={chartData} margin={{ top: 50, right: 10, left: 0, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
           <XAxis

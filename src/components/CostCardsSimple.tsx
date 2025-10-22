@@ -90,9 +90,9 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
 
   return (
     <>
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-4 text-foreground">Beräkna kostnader</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-foreground">Beräkna kostnader</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
           {categories.map((category) => {
             const Icon = category.icon;
             const minCost = calculateCost(category.kWhRange[0]);
@@ -102,21 +102,21 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
               <button
                 key={category.id}
                 onClick={() => handleCardClick(category)}
-                className="bg-card rounded-lg shadow-card p-4 border border-border hover:border-primary hover:shadow-elegant transition-all cursor-pointer text-left"
+                className="bg-card rounded-lg shadow-card p-2 sm:p-3 lg:p-4 border border-border hover:border-primary hover:shadow-elegant transition-all cursor-pointer text-left"
               >
-                <div className="flex flex-col items-center gap-2 mb-3">
-                  <div className="p-3 bg-primary/10 rounded-lg">
-                    <Icon className="w-6 h-6 text-primary" />
+                <div className="flex flex-col items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
+                  <div className="p-2 sm:p-2.5 lg:p-3 bg-primary/10 rounded-lg">
+                    <Icon className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-primary" />
                   </div>
-                  <h3 className="text-sm font-semibold text-foreground text-center">
+                  <h3 className="text-xs sm:text-sm font-semibold text-foreground text-center leading-tight">
                     {category.name}
                   </h3>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">
                     ({category.kWhRange[0]} - {category.kWhRange[1]} kWh)
                   </p>
-                  <p className="text-lg font-bold text-foreground">
+                  <p className="text-sm sm:text-base lg:text-lg font-bold text-foreground">
                     {minCost} - {maxCost} kr
                   </p>
                 </div>

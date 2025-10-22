@@ -138,7 +138,7 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-2 sm:px-4 py-3 sm:py-8">
+      <main className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 lg:py-8">
         {/* High/Low Price Cards */}
         <PriceHighLowCards 
           prices={priceData.today} 
