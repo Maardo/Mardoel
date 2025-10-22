@@ -64,42 +64,42 @@ const PriceHighLowCards = ({ prices, cheapest4Window, rollingPrices }: PriceHigh
         <p className="text-xs text-green-600 dark:text-green-400 mt-1">(inkl. moms)</p>
       </div>
 
-      {/* Highest Price Card */}
-      <div className="bg-card rounded-lg shadow-card p-4 border border-border">
+      {/* Highest Price Card - Red */}
+      <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 rounded-lg shadow-card p-4 border border-red-200 dark:border-red-800">
         <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 bg-price-expensive/10 rounded-lg">
-            <TrendingUp className="w-5 h-5 text-price-expensive" />
+          <div className="p-2 bg-red-500/20 rounded-lg">
+            <TrendingUp className="w-5 h-5 text-red-600 dark:text-red-400" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Dagens högsta pris</p>
-            <p className="text-sm font-semibold text-foreground">
+            <p className="text-xs text-red-700 dark:text-red-300">Dagens högsta pris</p>
+            <p className="text-sm font-semibold text-red-900 dark:text-red-100">
               Klockan {formatHour(highestPrice.hour)}
             </p>
           </div>
         </div>
-        <div className="text-2xl sm:text-3xl font-bold text-foreground">
+        <div className="text-2xl sm:text-3xl font-bold text-red-900 dark:text-red-100">
           {formatPrice(highestPrice.price)}
         </div>
-        <p className="text-xs text-muted-foreground mt-1">(inkl. moms)</p>
+        <p className="text-xs text-red-600 dark:text-red-400 mt-1">(inkl. moms)</p>
       </div>
 
-      {/* Lowest Price Card */}
-      <div className="bg-card rounded-lg shadow-card p-4 border border-border">
+      {/* Lowest Price Card - Dark Green */}
+      <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/30 dark:to-emerald-900/20 rounded-lg shadow-card p-4 border border-emerald-200 dark:border-emerald-800">
         <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 bg-price-cheap/10 rounded-lg">
-            <TrendingDown className="w-5 h-5 text-price-cheap" />
+          <div className="p-2 bg-emerald-600/20 rounded-lg">
+            <TrendingDown className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Dagens lägsta pris</p>
-            <p className="text-sm font-semibold text-foreground">
+            <p className="text-xs text-emerald-700 dark:text-emerald-300">Dagens lägsta pris</p>
+            <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
               Klockan {formatHour(lowestPrice.hour)}
             </p>
           </div>
         </div>
-        <div className="text-2xl sm:text-3xl font-bold text-foreground">
+        <div className="text-2xl sm:text-3xl font-bold text-emerald-900 dark:text-emerald-100">
           {formatPrice(lowestPrice.price)}
         </div>
-        <p className="text-xs text-muted-foreground mt-1">(inkl. moms)</p>
+        <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">(inkl. moms)</p>
       </div>
     </div>
   );
