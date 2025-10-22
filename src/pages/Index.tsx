@@ -23,10 +23,26 @@ const Index = () => {
     ? createRolling24HourView(priceData.today, priceData.tomorrow, currentHour)
     : [];
 
-  // Calculate optimal window for the rolling view
-  const cheapest4Window = rolling24Hours.length > 0 
-    ? findCheapestWindow(rolling24Hours, 4)
-    : null;
+  // Calculate optimal window for the rolling view - find cheapest 4 consecutive hours by index
+  let cheapest4Window: { startIdx: number; endIdx: number; avgPrice: number } | null = null;
+  if (rolling24Hours.length >= 4) {
+    let minSum = Infinity;
+    let minStartIdx = 0;
+    
+    for (let i = 0; i <= rolling24Hours.length - 4; i++) {
+      const sum = rolling24Hours.slice(i, i + 4).reduce((s, p) => s + p.price, 0);
+      if (sum < minSum) {
+        minSum = sum;
+        minStartIdx = i;
+      }
+    }
+    
+    cheapest4Window = {
+      startIdx: minStartIdx,
+      endIdx: minStartIdx + 3,
+      avgPrice: Math.round(minSum / 4)
+    };
+  }
 
   // Calculate selected window - find cheapest consecutive hours by index in rolling array
   let selectedWindow: { startIdx: number; endIdx: number; avgPrice: number } | null = null;
@@ -113,13 +129,17 @@ const Index = () => {
       {/* Main Content */}
       <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-6xl">
         {/* High/Low Price Cards */}
-        <PriceHighLowCards prices={priceData.today} />
+        <PriceHighLowCards 
+          prices={priceData.today} 
+          cheapest4Window={cheapest4Window}
+          rollingPrices={rolling24Hours}
+        />
 
         {/* Rolling 24-Hour Price Chart */}
         {rolling24Hours.length > 0 ? (
           <PriceChart
             rollingPrices={rolling24Hours}
-            optimalWindow={cheapest4Window}
+            optimalWindow={null}
             selectedHourWindow={selectedHourWindow}
             onSelectedHourWindowChange={setSelectedHourWindow}
             selectedWindow={selectedWindow}
