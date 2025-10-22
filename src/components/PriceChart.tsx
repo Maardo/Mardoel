@@ -210,6 +210,16 @@ const PriceChart = ({
                 {hours} timmar
               </Button>
             ))}
+            {selectedHours.length > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setSelectedHours([])}
+                className="h-8 px-3 text-xs font-semibold border-muted-foreground/30 hover:bg-destructive/10 hover:border-destructive/50"
+              >
+                Rensa
+              </Button>
+            )}
           </div>
         </div>
         

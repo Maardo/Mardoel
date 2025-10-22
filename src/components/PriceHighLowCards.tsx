@@ -26,42 +26,42 @@ const PriceHighLowCards = ({ prices, cheapest4Window, rollingPrices }: PriceHigh
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-      {/* Current Price Card - Blue */}
-      <div className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-950 dark:to-blue-900 rounded-lg shadow-card p-4 border border-blue-300 dark:border-blue-700">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 bg-blue-600/30 dark:bg-blue-500/20 rounded-lg">
-            <Zap className="w-5 h-5 text-blue-800 dark:text-blue-300" />
+      {/* Current Price Card - Blue - Larger */}
+      <div className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-950 dark:to-blue-900 rounded-lg shadow-card p-5 sm:p-6 border border-blue-300 dark:border-blue-700">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-3 bg-blue-600/30 dark:bg-blue-500/20 rounded-lg">
+            <Zap className="w-6 h-6 text-blue-800 dark:text-blue-300" />
           </div>
           <div>
-            <p className="text-xs text-blue-800 dark:text-blue-200 font-medium">Elpriset just nu</p>
-            <p className="text-sm font-semibold text-blue-950 dark:text-blue-50">
+            <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">Elpriset just nu</p>
+            <p className="text-base font-semibold text-blue-950 dark:text-blue-50">
               Klockan {formatHour(currentPrice.hour)}
             </p>
           </div>
         </div>
-        <div className="text-2xl sm:text-3xl font-bold text-blue-950 dark:text-blue-50">
+        <div className="text-3xl sm:text-4xl font-bold text-blue-950 dark:text-blue-50">
           {formatPrice(currentPrice.price)}
         </div>
-        <p className="text-xs text-blue-700 dark:text-blue-300 mt-1 font-medium">(inkl. moms)</p>
+        <p className="text-sm text-blue-700 dark:text-blue-300 mt-2 font-medium">(inkl. moms)</p>
       </div>
 
-      {/* Cheapest 4-Hour Window Card - Strong Green */}
-      <div className="bg-gradient-to-br from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 rounded-lg shadow-card p-4 border border-green-600 dark:border-green-500">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 bg-white/20 dark:bg-black/20 rounded-lg">
-            <Battery className="w-5 h-5 text-white" />
+      {/* Cheapest 4-Hour Window Card - Strong Green - Larger */}
+      <div className="bg-gradient-to-br from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 rounded-lg shadow-card p-5 sm:p-6 border border-green-600 dark:border-green-500">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-3 bg-white/20 dark:bg-black/20 rounded-lg">
+            <Battery className="w-6 h-6 text-white" />
           </div>
           <div>
-            <p className="text-xs text-green-50 font-medium">Bästa 4-timmars laddning</p>
-            <p className="text-sm font-semibold text-white">
+            <p className="text-sm text-green-50 font-medium">Bästa 4-timmars laddning</p>
+            <p className="text-base font-semibold text-white">
               {formatWindowTime()}
             </p>
           </div>
         </div>
-        <div className="text-2xl sm:text-3xl font-bold text-white">
+        <div className="text-3xl sm:text-4xl font-bold text-white">
           {cheapest4Window ? formatPrice(cheapest4Window.avgPrice) : "—"}
         </div>
-        <p className="text-xs text-green-50 mt-1 font-medium">(inkl. moms)</p>
+        <p className="text-sm text-green-50 mt-2 font-medium">(inkl. moms)</p>
       </div>
 
       {/* Highest Price Card - Strong Red */}
