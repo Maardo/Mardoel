@@ -95,8 +95,8 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           {categories.map((category) => {
             const Icon = category.icon;
-            const avgKwh = (category.kWhRange[0] + category.kWhRange[1]) / 2;
-            const cost = calculateCost(avgKwh);
+            const minCost = calculateCost(category.kWhRange[0]);
+            const maxCost = calculateCost(category.kWhRange[1]);
 
             return (
               <button
@@ -114,10 +114,11 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
                 </div>
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground mb-1">
-                    {category.kWhRange[0]}-{category.kWhRange[1]} kWh
+                    ({category.kWhRange[0]} - {category.kWhRange[1]} kWh)
                   </p>
-                  <p className="text-lg font-bold text-foreground">{cost} kr</p>
-                  <p className="text-xs text-muted-foreground">just nu</p>
+                  <p className="text-lg font-bold text-foreground">
+                    {minCost} - {maxCost} kr
+                  </p>
                 </div>
               </button>
             );
