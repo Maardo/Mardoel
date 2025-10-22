@@ -6,8 +6,10 @@ import {
   createRolling24HourView,
 } from "@/utils/priceUtils";
 import PriceChart from "@/components/PriceChart";
+import PriceNotification from "@/components/PriceNotification";
+import HeroSection from "@/components/HeroSection";
+import CostCards from "@/components/CostCards";
 import PriceHighLowCards from "@/components/PriceHighLowCards";
-import CostCardsSimple from "@/components/CostCardsSimple";
 import { Zap, Info, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -15,6 +17,11 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   const [priceData, setPriceData] = useState<PriceData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [optimalWindow, setOptimalWindow] = useState<{
+    startHour: number;
+    endHour: number;
+    avgPrice: number;
+  } | null>(null);
   const [selectedHourWindow, setSelectedHourWindow] = useState<number | null>(null);
 
   const currentHour = new Date().getHours();
@@ -24,26 +31,10 @@ const Index = () => {
     ? createRolling24HourView(priceData.today, priceData.tomorrow, currentHour)
     : [];
 
-  // Calculate optimal window for the rolling view - find cheapest 4 consecutive hours by index
-  let cheapest4Window: { startIdx: number; endIdx: number; avgPrice: number } | null = null;
-  if (rolling24Hours.length >= 4) {
-    let minSum = Infinity;
-    let minStartIdx = 0;
-    
-    for (let i = 0; i <= rolling24Hours.length - 4; i++) {
-      const sum = rolling24Hours.slice(i, i + 4).reduce((s, p) => s + p.price, 0);
-      if (sum < minSum) {
-        minSum = sum;
-        minStartIdx = i;
-      }
-    }
-    
-    cheapest4Window = {
-      startIdx: minStartIdx,
-      endIdx: minStartIdx + 3,
-      avgPrice: Math.round(minSum / 4)
-    };
-  }
+  // Calculate optimal window for the rolling view
+  const cheapest4Window = rolling24Hours.length > 0 
+    ? findCheapestWindow(rolling24Hours, 4)
+    : null;
 
   // Calculate selected window - find cheapest consecutive hours by index in rolling array
   let selectedWindow: { startIdx: number; endIdx: number; avgPrice: number } | null = null;
@@ -70,6 +61,11 @@ const Index = () => {
     setLoading(true);
     const data = await fetchPriceData();
     setPriceData(data);
+    
+    // Calculate optimal window for hero section (today only)
+    const todayOptimal = findCheapestWindow(data.today, 4);
+    setOptimalWindow(todayOptimal);
+    
     setLoading(false);
   };
 
@@ -101,7 +97,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-gradient-hero text-primary-foreground py-4 sm:py-6 shadow-elegant sticky top-0 z-10">
+      <header className="bg-gradient-hero text-primary-foreground py-4 sm:py-6 shadow-elegant">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -127,23 +123,28 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-6xl">
-        {/* High/Low Price Cards */}
-        <PriceHighLowCards 
-          prices={priceData.today} 
-          cheapest4Window={cheapest4Window}
-          rollingPrices={rolling24Hours}
-        />
+      {/* Hero Section */}
+      <HeroSection
+        prices={priceData.today}
+        optimalWindow={optimalWindow}
+      />
 
-        {/* Cost Cards - Simplified */}
-        <CostCardsSimple prices={priceData.today} />
+      {/* Main Content */}
+      <main className="container mx-auto px-2 sm:px-4 py-3 sm:py-8">
+        {/* Price Notification */}
+        <PriceNotification prices={priceData.today} />
+
+        {/* High/Low Price Cards */}
+        <PriceHighLowCards prices={priceData.today} />
+
+        {/* Cost Cards */}
+        <CostCards prices={priceData.today} />
 
         {/* Rolling 24-Hour Price Chart */}
         {rolling24Hours.length > 0 ? (
           <PriceChart
             rollingPrices={rolling24Hours}
-            optimalWindow={null}
+            optimalWindow={cheapest4Window}
             selectedHourWindow={selectedHourWindow}
             onSelectedHourWindowChange={setSelectedHourWindow}
             selectedWindow={selectedWindow}
@@ -161,17 +162,17 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-card border-t border-border mt-8 sm:mt-12 py-4 sm:py-6">
-        <div className="container mx-auto px-4 text-center">
-          <div className="text-xs sm:text-sm text-muted-foreground mb-2">
+      <footer className="bg-card border-t border-border mt-12 py-6">
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+          <p>
+            Live spotpriser via Elpriset Just Nu API. Data uppdateras automatiskt var 15:e minut.
+          </p>
+          <div className="text-xs mt-2">
             {priceData.tomorrow 
               ? "✓ Morgondagens priser tillgängliga" 
               : "⏳ Väntar på morgondagens priser (publiceras 13:00-14:00)"}
           </div>
-          <p className="text-xs text-muted-foreground/60">
-            Live spotpriser via Elpriset Just Nu API • Uppdateras var 15:e minut
-          </p>
-          <p className="text-xs mt-2 text-muted-foreground/50">
+          <p className="text-xs mt-2 opacity-60">
             Made by Mardo
           </p>
         </div>
