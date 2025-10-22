@@ -126,7 +126,7 @@ const PriceChart = ({
   };
 
   // Generate subtitle with time range
-  const endHour = (currentHour + 23) % 24;
+  const endHour = currentHour;
   const subtitle = `Från ${currentHour.toString().padStart(2, '0')}:00 idag till ${endHour.toString().padStart(2, '0')}:00 imorgon`;
 
   return (

@@ -116,9 +116,9 @@ export const createRolling24HourView = (
     }
   }
   
-  // Add hours from tomorrow (00:00 to current hour - 1) if available
+  // Add hours from tomorrow (00:00 to current hour) if available
   if (tomorrowPrices && tomorrowPrices.length > 0) {
-    for (let i = 0; i < currentHour; i++) {
+    for (let i = 0; i <= currentHour; i++) {
       const priceData = tomorrowPrices.find(p => p.hour === i);
       if (priceData) {
         rolling24.push({
