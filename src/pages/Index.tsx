@@ -134,6 +134,9 @@ const Index = () => {
           <p>
             Live spotpriser via Elpriset Just Nu API. Data uppdateras automatiskt var 15:e minut.
           </p>
+          <p className="text-xs mt-2 opacity-60">
+            Made by Mardo
+          </p>
         </div>
       </footer>
     </div>

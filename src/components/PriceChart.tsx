@@ -147,6 +147,11 @@ const PriceChart = ({
               Elpriser kommande 24 timmar
             </h3>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">{subtitle}</p>
+            {!hasNextDayData && (
+              <p className="text-[10px] sm:text-xs text-muted-foreground/70 mt-1 italic">
+                När morgondagens priser finns tillgängliga (efter ~13:00) kommer alla 24 timmar visas
+              </p>
+            )}
           </div>
           
           {/* Hour Selection Buttons */}
