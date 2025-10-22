@@ -71,13 +71,18 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
     if (!window || rollingPrices.length === 0) return null;
     
     const startHour = rollingPrices[window.startIdx];
-    const endHour = rollingPrices[window.endIdx];
+    const endIdx = window.endIdx;
+    
+    // Calculate end hour correctly (add 1 hour to the last hour in the window)
+    let endHourNum = rollingPrices[endIdx].originalHour + 1;
+    let endHourDisplay = formatHour(endHourNum);
+    
     const avgKwh = (selectedCategory.kWhRange[0] + selectedCategory.kWhRange[1]) / 2;
     const avgNormalPrice = prices.reduce((sum, p) => sum + p.price, 0) / prices.length;
     const savings = calculateSavings(avgNormalPrice, window.avgPrice, avgKwh);
     
     return {
-      timeRange: `${startHour.displayHour} - ${endHour.displayHour}`,
+      timeRange: `${startHour.displayHour} - ${endHourDisplay}`,
       price: window.avgPrice,
       savings
     };

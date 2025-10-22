@@ -123,7 +123,7 @@ export const createRolling24HourView = (
       if (priceData) {
         rolling24.push({
           ...priceData,
-          displayHour: `${formatHour(i)} +1`,
+          displayHour: formatHour(i),
           isNextDay: true,
           originalHour: i
         });
