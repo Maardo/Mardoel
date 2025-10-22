@@ -7,6 +7,7 @@ import {
 } from "@/utils/priceUtils";
 import PriceChart from "@/components/PriceChart";
 import PriceHighLowCards from "@/components/PriceHighLowCards";
+import CostCardsSimple from "@/components/CostCardsSimple";
 import { Zap, Info, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -134,6 +135,9 @@ const Index = () => {
           cheapest4Window={cheapest4Window}
           rollingPrices={rolling24Hours}
         />
+
+        {/* Cost Cards - Simplified */}
+        <CostCardsSimple prices={priceData.today} />
 
         {/* Rolling 24-Hour Price Chart */}
         {rolling24Hours.length > 0 ? (

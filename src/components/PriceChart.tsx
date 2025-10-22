@@ -172,6 +172,11 @@ const PriceChart = ({
               Elpriser kommande 24 timmar
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground">{subtitle}</p>
+            {!hasNextDayData && (
+              <p className="text-xs text-red-600 mt-1">
+                Morgondagens priser visas här när de publiceras (ca 13:00-14:00)
+              </p>
+            )}
           </div>
           
           {!hasNextDayData && (
@@ -185,28 +190,30 @@ const PriceChart = ({
           )}
           
           {/* Hour Selection Buttons */}
-          <div className="flex flex-wrap gap-2 justify-start sm:justify-end">
-            <span className="text-xs sm:text-sm text-muted-foreground self-center mr-2">Visa billigaste:</span>
-            {[2, 4, 6, 8].map((hours) => (
-              <Button
-                key={hours}
-                size="sm"
-                variant={selectedHourWindow === hours ? "default" : "outline"}
-                onClick={() => {
-                  const newValue = selectedHourWindow === hours ? null : hours;
-                  onSelectedHourWindowChange?.(newValue);
-                  setSelectedHours([]);
-                }}
-                className="h-8 px-3 sm:px-4 text-xs font-semibold"
-                style={selectedHourWindow === hours ? { 
-                  backgroundColor: "hsl(0, 84%, 60%)", 
-                  borderColor: "hsl(0, 84%, 60%)",
-                  color: "white"
-                } : undefined}
-              >
-                {hours}h
-              </Button>
-            ))}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-4">
+            <span className="text-sm font-medium text-foreground">Visa billigaste:</span>
+            <div className="flex flex-wrap gap-2">
+              {[2, 4, 6, 8].map((hours) => (
+                <Button
+                  key={hours}
+                  size="lg"
+                  variant={selectedHourWindow === hours ? "default" : "outline"}
+                  onClick={() => {
+                    const newValue = selectedHourWindow === hours ? null : hours;
+                    onSelectedHourWindowChange?.(newValue);
+                    setSelectedHours([]);
+                  }}
+                  className="h-10 sm:h-12 px-5 sm:px-6 text-sm sm:text-base font-semibold rounded-lg transition-all hover:scale-105"
+                  style={selectedHourWindow === hours ? { 
+                    backgroundColor: "hsl(0, 84%, 60%)", 
+                    borderColor: "hsl(0, 84%, 60%)",
+                    color: "white"
+                  } : undefined}
+                >
+                  {hours} timmar
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
         
