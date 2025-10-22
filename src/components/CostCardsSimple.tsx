@@ -191,11 +191,14 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-card rounded-lg p-3 border border-border">
-                      <p className="text-xs font-medium text-muted-foreground mb-1">Pris</p>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Pris per kWh</p>
                       <p className="text-lg font-bold text-foreground">
                         {formatPrice(getRecommendedTime()!.price)}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
+                        {((selectedCategory.kWhRange[0] + selectedCategory.kWhRange[1]) / 2)} kWh × {selectedCategory.hours}h
+                      </p>
+                      <p className="text-sm font-semibold text-foreground mt-1">
                         Total: {(((getRecommendedTime()!.price / 100) * ((selectedCategory.kWhRange[0] + selectedCategory.kWhRange[1]) / 2))).toFixed(2)} kr
                       </p>
                     </div>
