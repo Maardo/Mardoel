@@ -33,13 +33,36 @@ const PriceChart = ({
 }: PriceChartProps) => {
   const [selectedHours, setSelectedHours] = useState<number[]>([]);
 
-  // Calculate the 4 cheapest consecutive hours
+  // Calculate the 4 cheapest consecutive hours - match by index in rolling array
   const cheapest4Indices = optimalWindow 
-    ? Array.from({ length: 4 }, (_, i) => {
-        const hour = (optimalWindow.startHour + i) % rollingPrices.length;
-        return hour;
-      })
+    ? rollingPrices
+        .map((price, idx) => ({ ...price, idx }))
+        .filter((_, i) => i >= 0 && i < rollingPrices.length)
+        .slice()
+        .sort((a, b) => {
+          // Create a rolling window and find the cheapest consecutive 4 hours
+          return a.price - b.price;
+        })
+        .slice(0, 4)
+        .map(p => p.idx)
     : [];
+
+  // Better approach: find the actual 4 cheapest consecutive hours in the rolling array
+  let actualCheapest4Indices: number[] = [];
+  if (rollingPrices.length >= 4) {
+    let minSum = Infinity;
+    let minStartIdx = 0;
+    
+    for (let i = 0; i <= rollingPrices.length - 4; i++) {
+      const sum = rollingPrices.slice(i, i + 4).reduce((s, p) => s + p.price, 0);
+      if (sum < minSum) {
+        minSum = sum;
+        minStartIdx = i;
+      }
+    }
+    
+    actualCheapest4Indices = [minStartIdx, minStartIdx + 1, minStartIdx + 2, minStartIdx + 3];
+  }
 
   // Calculate selected window indices
   const selectedWindowIndices = selectedWindow
@@ -52,8 +75,12 @@ const PriceChart = ({
   // Calculate average price for selected window
   const avgSelectedWindow = selectedWindow ? selectedWindow.avgPrice / 100 : null;
 
-  // Average price for the 4 cheapest consecutive hours
-  const avgCheapest4 = optimalWindow ? optimalWindow.avgPrice / 100 : 0;
+  // Average price for the 4 cheapest consecutive hours - calculate from actual indices
+  const avgCheapest4 = actualCheapest4Indices.length === 4
+    ? rollingPrices
+        .filter((_, idx) => actualCheapest4Indices.includes(idx))
+        .reduce((sum, p) => sum + p.price, 0) / 4 / 100
+    : 0;
 
   // Calculate average price for the rolling 24 hours
   const avgRollingPrice = rollingPrices.length > 0
@@ -67,12 +94,12 @@ const PriceChart = ({
         .reduce((sum, p) => sum + p.price, 0) / selectedHours.length / 100
     : null;
 
-  // Prepare chart data
+  // Prepare chart data using the actual cheapest 4 consecutive indices
   const chartData = rollingPrices.map((hourData, idx) => ({
     hour: hourData.displayHour,
     hourNum: idx,
     pris: hourData.price / 100,
-    isCheap: cheapest4Indices.includes(idx),
+    isCheap: actualCheapest4Indices.includes(idx),
     isSelectedWindow: selectedWindowIndices.includes(idx),
     isSelected: selectedHours.includes(idx),
     isNextDay: hourData.isNextDay

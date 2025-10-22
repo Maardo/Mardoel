@@ -9,6 +9,7 @@ import PriceChart from "@/components/PriceChart";
 import PriceNotification from "@/components/PriceNotification";
 import HeroSection from "@/components/HeroSection";
 import CostCards from "@/components/CostCards";
+import PriceHighLowCards from "@/components/PriceHighLowCards";
 import { Zap, Info, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -116,6 +117,9 @@ const Index = () => {
       <main className="container mx-auto px-2 sm:px-4 py-3 sm:py-8">
         {/* Price Notification */}
         <PriceNotification prices={priceData.today} />
+
+        {/* High/Low Price Cards */}
+        <PriceHighLowCards prices={priceData.today} />
 
         {/* Cost Cards */}
         <CostCards prices={priceData.today} />
