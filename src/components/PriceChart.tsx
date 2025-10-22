@@ -19,7 +19,7 @@ interface PriceChartProps {
   optimalWindow?: { startHour: number; endHour: number; avgPrice: number } | null;
   selectedHourWindow?: number | null;
   onSelectedHourWindowChange?: (hours: number | null) => void;
-  selectedWindow?: { startHour: number; endHour: number; avgPrice: number } | null;
+  selectedWindow?: { startIdx: number; endIdx: number; avgPrice: number } | null;
   currentHour: number;
 }
 
@@ -64,12 +64,9 @@ const PriceChart = ({
     actualCheapest4Indices = [minStartIdx, minStartIdx + 1, minStartIdx + 2, minStartIdx + 3];
   }
 
-  // Calculate selected window indices
+  // Calculate selected window indices based on the new index-based structure
   const selectedWindowIndices = selectedWindow
-    ? Array.from({ length: selectedHourWindow || 0 }, (_, i) => {
-        const hour = (selectedWindow.startHour + i) % rollingPrices.length;
-        return hour;
-      })
+    ? Array.from({ length: selectedHourWindow || 0 }, (_, i) => selectedWindow.startIdx + i)
     : [];
   
   // Calculate average price for selected window

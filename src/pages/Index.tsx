@@ -36,10 +36,26 @@ const Index = () => {
     ? findCheapestWindow(rolling24Hours, 4)
     : null;
 
-  // Calculate selected window
-  const selectedWindow = selectedHourWindow && rolling24Hours.length > 0
-    ? findCheapestWindow(rolling24Hours, selectedHourWindow)
-    : null;
+  // Calculate selected window - find cheapest consecutive hours by index in rolling array
+  let selectedWindow: { startIdx: number; endIdx: number; avgPrice: number } | null = null;
+  if (selectedHourWindow && rolling24Hours.length >= selectedHourWindow) {
+    let minSum = Infinity;
+    let minStartIdx = 0;
+    
+    for (let i = 0; i <= rolling24Hours.length - selectedHourWindow; i++) {
+      const sum = rolling24Hours.slice(i, i + selectedHourWindow).reduce((s, p) => s + p.price, 0);
+      if (sum < minSum) {
+        minSum = sum;
+        minStartIdx = i;
+      }
+    }
+    
+    selectedWindow = {
+      startIdx: minStartIdx,
+      endIdx: minStartIdx + selectedHourWindow - 1,
+      avgPrice: Math.round(minSum / selectedHourWindow)
+    };
+  }
 
   const loadPrices = async () => {
     setLoading(true);
