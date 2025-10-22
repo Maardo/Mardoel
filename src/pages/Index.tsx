@@ -6,9 +6,6 @@ import {
   createRolling24HourView,
 } from "@/utils/priceUtils";
 import PriceChart from "@/components/PriceChart";
-import PriceNotification from "@/components/PriceNotification";
-import HeroSection from "@/components/HeroSection";
-import CostCards from "@/components/CostCards";
 import PriceHighLowCards from "@/components/PriceHighLowCards";
 import { Zap, Info, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -17,11 +14,6 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   const [priceData, setPriceData] = useState<PriceData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [optimalWindow, setOptimalWindow] = useState<{
-    startHour: number;
-    endHour: number;
-    avgPrice: number;
-  } | null>(null);
   const [selectedHourWindow, setSelectedHourWindow] = useState<number | null>(null);
 
   const currentHour = new Date().getHours();
@@ -61,11 +53,6 @@ const Index = () => {
     setLoading(true);
     const data = await fetchPriceData();
     setPriceData(data);
-    
-    // Calculate optimal window for hero section (today only)
-    const todayOptimal = findCheapestWindow(data.today, 4);
-    setOptimalWindow(todayOptimal);
-    
     setLoading(false);
   };
 
@@ -97,7 +84,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-gradient-hero text-primary-foreground py-4 sm:py-6 shadow-elegant">
+      <header className="bg-gradient-hero text-primary-foreground py-4 sm:py-6 shadow-elegant sticky top-0 z-10">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -123,22 +110,10 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <HeroSection
-        prices={priceData.today}
-        optimalWindow={optimalWindow}
-      />
-
       {/* Main Content */}
-      <main className="container mx-auto px-2 sm:px-4 py-3 sm:py-8">
-        {/* Price Notification */}
-        <PriceNotification prices={priceData.today} />
-
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-6xl">
         {/* High/Low Price Cards */}
         <PriceHighLowCards prices={priceData.today} />
-
-        {/* Cost Cards */}
-        <CostCards prices={priceData.today} />
 
         {/* Rolling 24-Hour Price Chart */}
         {rolling24Hours.length > 0 ? (
@@ -162,17 +137,17 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-card border-t border-border mt-12 py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>
-            Live spotpriser via Elpriset Just Nu API. Data uppdateras automatiskt var 15:e minut.
-          </p>
-          <div className="text-xs mt-2">
+      <footer className="bg-card border-t border-border mt-8 sm:mt-12 py-4 sm:py-6">
+        <div className="container mx-auto px-4 text-center">
+          <div className="text-xs sm:text-sm text-muted-foreground mb-2">
             {priceData.tomorrow 
               ? "✓ Morgondagens priser tillgängliga" 
               : "⏳ Väntar på morgondagens priser (publiceras 13:00-14:00)"}
           </div>
-          <p className="text-xs mt-2 opacity-60">
+          <p className="text-xs text-muted-foreground/60">
+            Live spotpriser via Elpriset Just Nu API • Uppdateras var 15:e minut
+          </p>
+          <p className="text-xs mt-2 text-muted-foreground/50">
             Made by Mardo
           </p>
         </div>

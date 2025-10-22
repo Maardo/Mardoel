@@ -164,27 +164,29 @@ const PriceChart = ({
   }
 
   return (
-    <div className="bg-card rounded-lg shadow-card p-3 sm:p-4 lg:p-6 border border-border">
+    <div className="bg-card rounded-xl shadow-card p-3 sm:p-4 lg:p-6 border border-border">
       <div className="mb-4 sm:mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
+        <div className="flex flex-col gap-3 mb-4">
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-foreground">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground mb-1">
               Elpriser kommande 24 timmar
-            </h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">{subtitle}</p>
-            {!hasNextDayData && (
-              <div className="mt-2 flex items-start gap-2 text-xs text-muted-foreground/70 bg-muted/30 p-2 rounded-md">
-                <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <p>
-                  Morgondagens elpriser publiceras normalt mellan 13:00-14:00. 
-                  När de finns tillgängliga kommer alla 24 timmar att visas i grafen.
-                </p>
-              </div>
-            )}
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">{subtitle}</p>
           </div>
           
+          {!hasNextDayData && (
+            <div className="flex items-start gap-2 text-xs text-muted-foreground/70 bg-muted/30 p-3 rounded-lg">
+              <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <p>
+                Morgondagens elpriser publiceras normalt mellan 13:00-14:00. 
+                När de finns tillgängliga kommer alla 24 timmar att visas.
+              </p>
+            </div>
+          )}
+          
           {/* Hour Selection Buttons */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 justify-start sm:justify-end">
+            <span className="text-xs sm:text-sm text-muted-foreground self-center mr-2">Visa billigaste:</span>
             {[2, 4, 6, 8].map((hours) => (
               <Button
                 key={hours}
@@ -195,14 +197,14 @@ const PriceChart = ({
                   onSelectedHourWindowChange?.(newValue);
                   setSelectedHours([]);
                 }}
-                className="h-8 px-3 text-xs font-semibold"
+                className="h-8 px-3 sm:px-4 text-xs font-semibold"
                 style={selectedHourWindow === hours ? { 
                   backgroundColor: "hsl(0, 84%, 60%)", 
                   borderColor: "hsl(0, 84%, 60%)",
                   color: "white"
                 } : undefined}
               >
-                {hours} timmar
+                {hours}h
               </Button>
             ))}
           </div>
