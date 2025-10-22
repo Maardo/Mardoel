@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Rolling24HourPrice, findCheapestWindow } from "@/utils/priceUtils";
 import { Button } from "@/components/ui/button";
+import { Info } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -148,9 +149,13 @@ const PriceChart = ({
             </h3>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">{subtitle}</p>
             {!hasNextDayData && (
-              <p className="text-[10px] sm:text-xs text-muted-foreground/70 mt-1 italic">
-                När morgondagens priser finns tillgängliga (efter ~13:00) kommer alla 24 timmar visas
-              </p>
+              <div className="mt-2 flex items-start gap-2 text-xs text-muted-foreground/70 bg-muted/30 p-2 rounded-md">
+                <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <p>
+                  Morgondagens elpriser publiceras normalt mellan 13:00-14:00. 
+                  När de finns tillgängliga kommer alla 24 timmar att visas i grafen.
+                </p>
+              </div>
             )}
           </div>
           

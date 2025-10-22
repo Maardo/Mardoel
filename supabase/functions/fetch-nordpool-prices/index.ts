@@ -76,6 +76,12 @@ Deno.serve(async (req) => {
     console.log('Successfully fetched price data');
     console.log(`Today: ${todayData?.length || 0} prices`);
     console.log(`Tomorrow: ${tomorrowData?.length || 0} prices`);
+    
+    // Extra logging for tomorrow's data
+    if (tomorrowResponse.ok && (!tomorrowData || tomorrowData.length === 0)) {
+      console.log('Tomorrow URL:', tomorrowUrl);
+      console.log('Tomorrow response was OK but returned empty/null data - prices not published yet');
+    }
 
     // Transform the data
     const transformPrices = (data: any[]): HourlyPrice[] => {

@@ -9,8 +9,9 @@ import PriceChart from "@/components/PriceChart";
 import PriceNotification from "@/components/PriceNotification";
 import HeroSection from "@/components/HeroSection";
 import CostCards from "@/components/CostCards";
-import { Zap, Info } from "lucide-react";
+import { Zap, Info, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [priceData, setPriceData] = useState<PriceData | null>(null);
@@ -81,14 +82,26 @@ const Index = () => {
       {/* Header */}
       <header className="bg-gradient-hero text-primary-foreground py-4 sm:py-6 shadow-elegant">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-3">
-            <Zap className="w-6 h-6 sm:w-8 sm:h-8" />
-            <div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Elpriser SE3</h1>
-              <p className="text-xs sm:text-sm text-primary-foreground/90">
-                Aktuella elpriser och smart laddningsplanering
-              </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Zap className="w-6 h-6 sm:w-8 sm:h-8" />
+              <div>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Elpriser SE3</h1>
+                <p className="text-xs sm:text-sm text-primary-foreground/90">
+                  Aktuella elpriser och smart laddningsplanering
+                </p>
+              </div>
             </div>
+            <Button 
+              onClick={loadPrices} 
+              size="sm" 
+              variant="outline"
+              disabled={loading}
+              className="bg-white/10 border-white/20 hover:bg-white/20 text-white"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Uppdatera</span>
+            </Button>
           </div>
         </div>
       </header>
@@ -134,6 +147,11 @@ const Index = () => {
           <p>
             Live spotpriser via Elpriset Just Nu API. Data uppdateras automatiskt var 15:e minut.
           </p>
+          <div className="text-xs mt-2">
+            {priceData.tomorrow 
+              ? "✓ Morgondagens priser tillgängliga" 
+              : "⏳ Väntar på morgondagens priser (publiceras 13:00-14:00)"}
+          </div>
           <p className="text-xs mt-2 opacity-60">
             Made by Mardo
           </p>
