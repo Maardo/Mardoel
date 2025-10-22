@@ -173,6 +173,11 @@ const PriceChart = ({
             </h3>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">{subtitle}</p>
             {!hasNextDayData && (
+              <p className="text-xs text-muted-foreground/70 mt-1 italic">
+                När morgondagens priser inte finns än (före ~13:00), visar den dagens återstående timmar. När morgondagens priser finns tillgängliga kommer den visa alla 24 timmar framåt.
+              </p>
+            )}
+            {!hasNextDayData && (
               <div className="mt-2 flex items-start gap-2 text-xs text-muted-foreground/70 bg-muted/30 p-2 rounded-md">
                 <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <p>
