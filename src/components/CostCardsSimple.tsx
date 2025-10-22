@@ -195,6 +195,9 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
                       <p className="text-lg font-bold text-foreground">
                         {formatPrice(getRecommendedTime()!.price)}
                       </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Total: {(((getRecommendedTime()!.price / 100) * ((selectedCategory.kWhRange[0] + selectedCategory.kWhRange[1]) / 2))).toFixed(2)} kr
+                      </p>
                     </div>
                     <div className="bg-price-cheap rounded-lg p-3">
                       <p className="text-xs font-semibold text-price-cheap-foreground mb-1">Besparing</p>
