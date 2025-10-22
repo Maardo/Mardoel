@@ -125,9 +125,18 @@ const PriceChart = ({
     return null;
   };
 
-  // Generate subtitle with time range
-  const endHour = currentHour;
-  const subtitle = `Från ${currentHour.toString().padStart(2, '0')}:00 idag till ${endHour.toString().padStart(2, '0')}:00 imorgon`;
+  // Generate subtitle with time range based on available data
+  const hasNextDayData = rollingPrices.some(p => p.isNextDay);
+  const lastHour = rollingPrices.length > 0 ? rollingPrices[rollingPrices.length - 1] : null;
+  
+  let subtitle = '';
+  if (hasNextDayData && lastHour?.isNextDay) {
+    const endHour = lastHour.originalHour;
+    subtitle = `Från ${currentHour.toString().padStart(2, '0')}:00 idag till ${endHour.toString().padStart(2, '0')}:00 imorgon`;
+  } else if (lastHour) {
+    const endHour = lastHour.originalHour;
+    subtitle = `Från ${currentHour.toString().padStart(2, '0')}:00 till ${endHour.toString().padStart(2, '0')}:00 idag`;
+  }
 
   return (
     <div className="bg-card rounded-lg shadow-card p-3 sm:p-4 lg:p-6 border border-border">
