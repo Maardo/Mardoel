@@ -126,9 +126,9 @@ const Index = () => {
             <Button 
               onClick={loadPrices} 
               size="sm" 
-              variant="outline"
+              variant="secondary"
               disabled={loading}
-              className="bg-white/10 border-white/20 hover:bg-white/20 text-white"
+              className="backdrop-blur-sm hover:scale-105 transition-all duration-300"
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Uppdatera</span>

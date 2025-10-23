@@ -116,10 +116,10 @@ const PriceChart = ({
 
   // Get bar color based on status - priority: selected > selectedWindow > cheap > normal
   const getBarColor = (entry: any) => {
-    if (entry.isSelected) return "hsl(48, 100%, 50%)"; // Yellow for manually selected
-    if (entry.isSelectedWindow) return "hsl(0, 84%, 60%)"; // Red for selected charging window
-    if (entry.isCheap) return "hsl(142, 71%, 45%)"; // Green for 4 cheapest consecutive
-    return "hsl(199, 89%, 48%)"; // Light blue for normal bars
+    if (entry.isSelected) return "hsl(var(--chart-selected))";
+    if (entry.isSelectedWindow) return "hsl(var(--chart-window))";
+    if (entry.isCheap) return "hsl(var(--price-cheap))";
+    return "hsl(var(--chart-normal))";
   };
 
   const CustomTooltip = ({ active, payload }: any) => {
@@ -135,13 +135,13 @@ const PriceChart = ({
             {payload[0].value.toFixed(2)} kr/kWh (inkl. moms)
           </p>
           {data.isCheap && !data.isSelectedWindow && !data.isSelected && (
-            <p className="text-xs mt-1" style={{ color: "hsl(142, 71%, 45%)" }}>✓ Bland de 4 billigaste sammanhängande</p>
+            <p className="text-xs mt-1 text-price-cheap">✓ Bland de 4 billigaste sammanhängande</p>
           )}
           {data.isSelectedWindow && !data.isSelected && (
-            <p className="text-xs mt-1" style={{ color: "hsl(0, 84%, 60%)" }}>✓ Valt laddningsfönster</p>
+            <p className="text-xs mt-1 text-chart-window">✓ Valt laddningsfönster</p>
           )}
           {data.isSelected && (
-            <p className="text-xs mt-1" style={{ color: "hsl(48, 100%, 50%)" }}>✓ Manuellt vald</p>
+            <p className="text-xs mt-1 text-chart-selected">✓ Manuellt vald</p>
           )}
           <p className="text-xs text-muted-foreground mt-1">Klicka för att välja/avmarkera</p>
         </div>
@@ -164,8 +164,8 @@ const PriceChart = ({
   }
 
   return (
-    <div className="bg-card rounded-lg shadow-card p-2 sm:p-3 lg:p-6 border border-border">
-      <div className="mb-3 sm:mb-4 lg:mb-6">
+    <div className="bg-card rounded-xl shadow-elegant p-3 sm:p-4 lg:p-6 border border-border hover:shadow-glow transition-all duration-300">
+      <div className="mb-4 sm:mb-5 lg:mb-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
           <div>
             <h3 className="text-base sm:text-lg lg:text-xl font-bold text-foreground">
@@ -194,12 +194,7 @@ const PriceChart = ({
                   onSelectedHourWindowChange?.(newValue);
                   setSelectedHours([]);
                 }}
-                className="h-8 px-3 text-xs font-semibold"
-                style={selectedHourWindow === hours ? { 
-                  backgroundColor: "hsl(0, 84%, 60%)", 
-                  borderColor: "hsl(0, 84%, 60%)",
-                  color: "white"
-                } : undefined}
+                className="h-8 px-3 text-xs font-semibold transition-all duration-300"
               >
                 {hours} timmar
               </Button>
@@ -217,26 +212,26 @@ const PriceChart = ({
           </div>
         </div>
         
-        <div className="flex flex-col gap-1 sm:gap-2">
+          <div className="flex flex-col gap-2 bg-muted/30 rounded-lg p-3">
           <p className="text-[10px] sm:text-xs lg:text-sm font-medium text-foreground">
-            Snitt 24h: <span className="text-sm sm:text-base lg:text-lg font-bold">{avgRollingPrice.toFixed(2)} kr/kWh</span>
+            Snitt 24h: <span className="text-sm sm:text-base lg:text-lg font-bold text-primary">{avgRollingPrice.toFixed(2)} kr/kWh</span>
           </p>
-          <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs lg:text-sm">
-            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded" style={{ backgroundColor: "hsl(142, 71%, 45%)" }}></div>
-            <span className="text-muted-foreground">4 billigaste sammanhängande: {avgCheapest4.toFixed(2)} kr/kWh</span>
+          <div className="flex items-center gap-2 text-[10px] sm:text-xs lg:text-sm">
+            <div className="w-3 h-3 rounded bg-price-cheap"></div>
+            <span className="text-muted-foreground">4 billigaste sammanhängande: <span className="font-semibold text-foreground">{avgCheapest4.toFixed(2)} kr/kWh</span></span>
           </div>
           {selectedWindow && avgSelectedWindow && (
-            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs lg:text-sm">
-              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded" style={{ backgroundColor: "hsl(0, 84%, 60%)" }}></div>
+            <div className="flex items-center gap-2 text-[10px] sm:text-xs lg:text-sm">
+              <div className="w-3 h-3 rounded bg-chart-window"></div>
               <span className="text-muted-foreground">
-                Valt laddningsfönster ({selectedHourWindow}h): {avgSelectedWindow.toFixed(2)} kr/kWh
+                Valt laddningsfönster ({selectedHourWindow}h): <span className="font-semibold text-foreground">{avgSelectedWindow.toFixed(2)} kr/kWh</span>
               </span>
             </div>
           )}
           {selectedHours.length > 0 && (
-            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs lg:text-sm">
-              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded" style={{ backgroundColor: "hsl(48, 100%, 50%)" }}></div>
-              <span className="text-muted-foreground">Manuellt valda: ({selectedHours.length}h, snitt: {avgSelectedPrice?.toFixed(2)} kr/kWh)</span>
+            <div className="flex items-center gap-2 text-[10px] sm:text-xs lg:text-sm">
+              <div className="w-3 h-3 rounded bg-chart-selected"></div>
+              <span className="text-muted-foreground">Manuellt valda: <span className="font-semibold text-foreground">({selectedHours.length}h, snitt: {avgSelectedPrice?.toFixed(2)} kr/kWh)</span></span>
             </div>
           )}
         </div>

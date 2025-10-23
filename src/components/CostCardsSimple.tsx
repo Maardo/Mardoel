@@ -119,9 +119,9 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
 
   return (
     <>
-      <div className="mb-4 sm:mb-6">
-        <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-foreground">Beräkna kostnader</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-base sm:text-lg font-semibold mb-4 sm:mb-5 text-foreground">Beräkna kostnader</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-5xl mx-auto">
           {categories.map((category) => {
             const Icon = category.icon;
             const minCost = calculateCost(category.kWhRange[0]);
@@ -131,11 +131,11 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
               <button
                 key={category.id}
                 onClick={() => handleCardClick(category)}
-                className="bg-card rounded-lg shadow-card p-2 sm:p-3 lg:p-4 border border-border hover:border-primary hover:shadow-elegant transition-all cursor-pointer text-left"
+                className="bg-card rounded-xl shadow-card p-3 sm:p-4 lg:p-5 border border-border hover:border-primary hover:shadow-glow transition-all duration-300 cursor-pointer text-left group"
               >
-                <div className="flex flex-col items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
-                  <div className="p-2 sm:p-2.5 lg:p-3 bg-primary/10 rounded-lg">
-                    <Icon className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-primary" />
+                <div className="flex flex-col items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                  <div className="p-2.5 sm:p-3 lg:p-3.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-all duration-300">
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-primary group-hover:scale-110 transition-transform duration-300" />
                   </div>
                   <h3 className="text-xs sm:text-sm font-semibold text-foreground text-center leading-tight">
                     {category.name}

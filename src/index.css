@@ -38,7 +38,7 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
 
-    /* Electricity price colors - higher contrast */
+    /* Electricity price colors */
     --price-cheap: 142 76% 36%;
     --price-cheap-foreground: 0 0% 100%;
     --price-expensive: 0 84% 50%;
@@ -46,16 +46,37 @@ All colors MUST be HSL.
     --price-optimal: 217 91% 60%;
     --price-optimal-foreground: 0 0% 100%;
     
+    /* Status card colors */
+    --status-current: 217 91% 60%;
+    --status-current-foreground: 0 0% 100%;
+    --status-best: 142 71% 36%;
+    --status-best-foreground: 0 0% 100%;
+    --status-high: 0 72% 51%;
+    --status-high-foreground: 0 0% 100%;
+    --status-low: 158 64% 41%;
+    --status-low-foreground: 0 0% 100%;
+    
+    /* Chart colors */
+    --chart-normal: 199 89% 48%;
+    --chart-selected: 48 96% 53%;
+    --chart-window: 0 84% 60%;
+    
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(220 60% 40%) 0%, hsl(220 70% 50%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 20% 98%) 100%);
+    --gradient-current: linear-gradient(135deg, hsl(217 91% 55%) 0%, hsl(217 91% 65%) 100%);
+    --gradient-best: linear-gradient(135deg, hsl(142 71% 32%) 0%, hsl(142 71% 42%) 100%);
+    --gradient-high: linear-gradient(135deg, hsl(0 72% 47%) 0%, hsl(0 72% 57%) 100%);
+    --gradient-low: linear-gradient(135deg, hsl(158 64% 37%) 0%, hsl(158 64% 47%) 100%);
     
     /* Shadows */
-    --shadow-elegant: 0 4px 20px -2px hsl(220 60% 40% / 0.12);
+    --shadow-elegant: 0 4px 20px -2px hsl(220 60% 40% / 0.15);
     --shadow-card: 0 2px 8px -1px hsl(220 20% 20% / 0.08);
+    --shadow-glow: 0 0 20px hsl(220 60% 40% / 0.1);
     
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
 
   .dark {
@@ -87,7 +108,7 @@ All colors MUST be HSL.
     --input: 220 20% 22%;
     --ring: 220 60% 60%;
 
-    /* Electricity price colors - darker variants with high contrast */
+    /* Electricity price colors - darker variants */
     --price-cheap: 142 76% 45%;
     --price-cheap-foreground: 0 0% 100%;
     --price-expensive: 0 84% 60%;
@@ -95,13 +116,33 @@ All colors MUST be HSL.
     --price-optimal: 217 91% 65%;
     --price-optimal-foreground: 0 0% 100%;
     
+    /* Status card colors */
+    --status-current: 217 91% 65%;
+    --status-current-foreground: 0 0% 100%;
+    --status-best: 142 71% 45%;
+    --status-best-foreground: 0 0% 100%;
+    --status-high: 0 72% 60%;
+    --status-high-foreground: 0 0% 100%;
+    --status-low: 158 64% 50%;
+    --status-low-foreground: 0 0% 100%;
+    
+    /* Chart colors */
+    --chart-normal: 199 89% 55%;
+    --chart-selected: 48 96% 60%;
+    --chart-window: 0 84% 65%;
+    
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(220 30% 12%) 0%, hsl(220 35% 18%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(220 25% 14%) 0%, hsl(220 30% 12%) 100%);
+    --gradient-current: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(217 91% 70%) 100%);
+    --gradient-best: linear-gradient(135deg, hsl(142 71% 40%) 0%, hsl(142 71% 50%) 100%);
+    --gradient-high: linear-gradient(135deg, hsl(0 72% 55%) 0%, hsl(0 72% 65%) 100%);
+    --gradient-low: linear-gradient(135deg, hsl(158 64% 45%) 0%, hsl(158 64% 55%) 100%);
     
     /* Shadows */
     --shadow-elegant: 0 4px 20px -2px hsl(0 0% 0% / 0.3);
     --shadow-card: 0 2px 8px -1px hsl(0 0% 0% / 0.25);
+    --shadow-glow: 0 0 20px hsl(220 60% 60% / 0.15);
   }
 }
 
