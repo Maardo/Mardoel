@@ -171,18 +171,12 @@ const PriceChart = ({
             <h3 className="text-base sm:text-lg lg:text-xl font-bold text-foreground">
               Elpriser kommande 24 timmar
             </h3>
-            <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground mt-1">{subtitle}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{subtitle}</p>
             {!hasNextDayData && (
-              <p className="text-[10px] sm:text-xs text-muted-foreground/70 mt-1 italic hidden sm:block">
-                När morgondagens priser inte finns än (före ~13:00), visar den dagens återstående timmar. När morgondagens priser finns tillgängliga kommer den visa alla 24 timmar framåt.
-              </p>
-            )}
-            {!hasNextDayData && (
-              <div className="mt-2 flex items-start gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground/70 bg-muted/30 p-1.5 sm:p-2 rounded-md">
-                <Info className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
-                <p>
-                  Morgondagens elpriser publiceras normalt mellan 13:00-14:00. 
-                  När de finns tillgängliga kommer alla 24 timmar att visas i grafen.
+              <div className="mt-2 flex items-start gap-1.5 text-[10px] sm:text-xs text-muted-foreground bg-muted/30 p-2 rounded-md">
+                <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                <p className="leading-snug">
+                  Visar dagens återstående timmar. Morgondagens priser publiceras 13:00-14:00 och då visas alla 24 timmar.
                 </p>
               </div>
             )}
