@@ -152,48 +152,27 @@ const Index = () => {
           rollingPrices={rolling24Hours}
         />
 
-        {/* Price Chart Section */}
-        <div className="mb-4 sm:mb-6">
-          <div className="bg-card rounded-lg shadow-card border border-border p-4 sm:p-6 mb-4">
-            <h2 className="text-lg sm:text-xl font-bold text-foreground mb-2">
-              Elpriser kommande 24 timmar
-            </h2>
-            
-            {rolling24Hours.length > 0 ? (
-              <>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Från {rolling24Hours[0]?.displayHour} till {rolling24Hours[rolling24Hours.length - 1]?.displayHour} {rolling24Hours[0]?.originalHour >= currentHour ? 'idag' : 'imorgon'}
-                </p>
-                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                  När morgondagens priser inte finns tillgängliga (före ~13:00), visar den dagens återstående timmar. 
-                  När morgondagens priser finns tillgängliga kommer den visa alla 24 timmar framåt.
-                </p>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground mb-4">
-                Kompletta 24-timmars priser visas efter kl 13:00 när morgondagens priser publiceras.
-              </p>
-            )}
-            
-            <Alert className="border-primary/20 bg-primary/5">
-              <Info className="h-4 w-4 text-primary" />
-              <AlertDescription className="text-sm">
-                Morgondagens elpriser publiceras normalt mellan 13:00-14:00. När de finns tillgängliga kommer alla 24 timmar att visas i grafen.
-              </AlertDescription>
-            </Alert>
-          </div>
+        {/* Info Alert */}
+        <Alert className="mb-4 border-primary/20 bg-primary/5">
+          <Info className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-sm leading-relaxed">
+            När morgondagens priser inte finns tillgängliga (före ~13:00), visar den dagens återstående timmar. 
+            När morgondagens priser finns tillgängliga kommer den visa alla 24 timmar framåt. 
+            Morgondagens elpriser publiceras normalt mellan 13:00-14:00. När de finns tillgängliga kommer alla 24 timmar att visas i grafen.
+          </AlertDescription>
+        </Alert>
 
-          {rolling24Hours.length > 0 && (
-            <PriceChart
-              rollingPrices={rolling24Hours}
-              optimalWindow={null}
-              selectedHourWindow={selectedHourWindow}
-              onSelectedHourWindowChange={setSelectedHourWindow}
-              selectedWindow={selectedWindow}
-              currentHour={currentHour}
-            />
-          )}
-        </div>
+        {/* Rolling 24-Hour Price Chart */}
+        {rolling24Hours.length > 0 && (
+          <PriceChart
+            rollingPrices={rolling24Hours}
+            optimalWindow={null}
+            selectedHourWindow={selectedHourWindow}
+            onSelectedHourWindowChange={setSelectedHourWindow}
+            selectedWindow={selectedWindow}
+            currentHour={currentHour}
+          />
+        )}
       </main>
 
       {/* Footer */}
