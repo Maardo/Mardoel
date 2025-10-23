@@ -152,18 +152,8 @@ const Index = () => {
           rollingPrices={rolling24Hours}
         />
 
-        {/* Info Alert */}
-        <Alert className="mb-4 border-primary/20 bg-primary/5">
-          <Info className="h-4 w-4 text-primary" />
-          <AlertDescription className="text-sm leading-relaxed">
-            När morgondagens priser inte finns tillgängliga (före ~13:00), visar den dagens återstående timmar. 
-            När morgondagens priser finns tillgängliga kommer den visa alla 24 timmar framåt. 
-            Morgondagens elpriser publiceras normalt mellan 13:00-14:00. När de finns tillgängliga kommer alla 24 timmar att visas i grafen.
-          </AlertDescription>
-        </Alert>
-
         {/* Rolling 24-Hour Price Chart */}
-        {rolling24Hours.length > 0 && (
+        {rolling24Hours.length > 0 ? (
           <PriceChart
             rollingPrices={rolling24Hours}
             optimalWindow={null}
@@ -172,6 +162,14 @@ const Index = () => {
             selectedWindow={selectedWindow}
             currentHour={currentHour}
           />
+        ) : (
+          <Alert className="mb-6">
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              Kompletta 24-timmars priser visas efter kl 13:00 när morgondagens priser publiceras.
+              För tillfället visas endast dagens återstående timmar.
+            </AlertDescription>
+          </Alert>
         )}
       </main>
 

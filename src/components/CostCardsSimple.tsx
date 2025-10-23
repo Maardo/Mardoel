@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { HourlyPrice, Rolling24HourPrice, formatPrice, formatHour, calculateSavings } from "@/utils/priceUtils";
-import { Car, WashingMachine, UtensilsCrossed, Flame, Bath, Clock, TrendingDown, Settings } from "lucide-react";
+import { Car, WashingMachine, UtensilsCrossed, Wind, Zap, Clock, TrendingDown, Settings } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Dialog,
   DialogContent,
@@ -27,12 +28,13 @@ interface CostCategory {
 
 const categories: CostCategory[] = [
   { id: "car", name: "Ladda bilen", icon: Car, kWhRange: [10, 100], hours: 6 },
-  { id: "laundry", name: "Tvättmaskin/Torktumlare", icon: WashingMachine, kWhRange: [1, 2], hours: 3 },
   { id: "dishwasher", name: "Diskmaskin", icon: UtensilsCrossed, kWhRange: [1, 2], hours: 2 },
-  { id: "bath", name: "Ett bad", icon: Bath, kWhRange: [3, 5], hours: 1 },
+  { id: "laundry", name: "Tvättmaskin", icon: WashingMachine, kWhRange: [1, 2], hours: 3 },
+  { id: "dryer", name: "Torktumlare", icon: Wind, kWhRange: [2, 4], hours: 2 },
 ];
 
 const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
+  const [selectedDevice, setSelectedDevice] = useState<string>("car");
   const [selectedCategory, setSelectedCategory] = useState<CostCategory | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [customStartHour, setCustomStartHour] = useState<number>(0);
@@ -117,8 +119,99 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
     };
   };
 
+  const formatSwedishDateTime = (date: Date) => {
+    const day = date.getDate();
+    const monthNames = [
+      "januari", "februari", "mars", "april", "maj", "juni",
+      "juli", "augusti", "september", "oktober", "november", "december"
+    ];
+    const month = monthNames[date.getMonth()];
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    
+    return `den ${day} ${month} kl. ${hours}:${minutes}`;
+  };
+
+  const calculateDeviceSavings = (deviceId: string) => {
+    const category = categories.find(c => c.id === deviceId);
+    if (!category) return null;
+    
+    const window = findCheapestWindow(category.hours);
+    if (!window || rollingPrices.length === 0) return null;
+    
+    const startDate = new Date();
+    startDate.setHours(rollingPrices[window.startIdx].originalHour, 0, 0, 0);
+    
+    const endDate = new Date(startDate);
+    endDate.setHours(startDate.getHours() + category.hours);
+    
+    const avgKwh = (category.kWhRange[0] + category.kWhRange[1]) / 2;
+    const avgNormalPrice = prices.reduce((sum, p) => sum + p.price, 0) / prices.length;
+    const savings = calculateSavings(avgNormalPrice, window.avgPrice, avgKwh);
+    
+    return {
+      deviceName: category.name,
+      startTime: formatSwedishDateTime(startDate),
+      endTime: formatSwedishDateTime(endDate),
+      savings: savings.toFixed(2),
+      icon: category.icon
+    };
+  };
+
+  const deviceSavings = calculateDeviceSavings(selectedDevice);
+
   return (
     <>
+      {/* Dina enheter sektion */}
+      <div className="bg-card rounded-lg shadow-card border border-border p-4 sm:p-6 mb-6">
+        <div className="flex items-center gap-2 mb-2">
+          <Zap className="w-5 h-5 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Dina enheter</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Se hur mycket du kan spara genom att använda dina enheter när spotpriset är som lägst
+        </p>
+        
+        {deviceSavings && (
+          <div className="bg-muted/30 rounded-lg p-4 border border-border">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                <deviceSavings.icon className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-foreground leading-relaxed">
+                  Om du använder <strong>{deviceSavings.deviceName}</strong> mellan {deviceSavings.startTime} och {deviceSavings.endTime}, 
+                  så kommer du att göra en uppskattad besparing på{" "}
+                  <strong className="text-price-cheap">{deviceSavings.savings} kronor</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Enhetsval med radiobuttons */}
+      <div className="bg-card rounded-lg shadow-card border border-border p-4 mb-6">
+        <h3 className="text-base font-semibold text-foreground mb-2">Tillagda enheter</h3>
+        <p className="text-sm text-muted-foreground mb-4">Välj en av enheterna i listan</p>
+        
+        <RadioGroup value={selectedDevice} onValueChange={setSelectedDevice}>
+          {categories.map(category => (
+            <div key={category.id} className="flex items-center space-x-2 py-2">
+              <RadioGroupItem value={category.id} id={category.id} />
+              <Label 
+                htmlFor={category.id} 
+                className="flex items-center gap-2 cursor-pointer text-sm font-medium"
+              >
+                <category.icon className="w-4 h-4 text-primary" />
+                {category.name}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </div>
+
+      {/* Befintlig sektion: Beräkna kostnader */}
       <div className="mb-4 sm:mb-6">
         <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-foreground">Beräkna kostnader</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
