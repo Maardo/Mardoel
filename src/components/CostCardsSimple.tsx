@@ -121,7 +121,7 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
     <>
       <div className="mb-4 sm:mb-6">
         <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-foreground">Beräkna kostnader</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
           {categories.map((category) => {
             const Icon = category.icon;
             const minCost = calculateCost(category.kWhRange[0]);
