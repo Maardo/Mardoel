@@ -224,14 +224,16 @@ const PriceChart = ({
             <div className="flex items-center gap-2 text-[10px] sm:text-xs lg:text-sm">
               <div className="w-3 h-3 rounded bg-chart-window"></div>
               <span className="text-muted-foreground">
-                Valt laddningsfönster ({selectedHourWindow}h): <span className="font-semibold text-foreground">{avgSelectedWindow.toFixed(2)} kr/kWh</span>
+                Valt laddningsfönster {rollingPrices[selectedWindow.startIdx]?.displayHour}-{rollingPrices[selectedWindow.endIdx]?.displayHour} ({selectedHourWindow}h): <span className="font-semibold text-foreground">{avgSelectedWindow.toFixed(2)} kr/kWh</span>
               </span>
             </div>
           )}
           {selectedHours.length > 0 && (
             <div className="flex items-center gap-2 text-[10px] sm:text-xs lg:text-sm">
               <div className="w-3 h-3 rounded bg-chart-selected"></div>
-              <span className="text-muted-foreground">Manuellt valda: <span className="font-semibold text-foreground">({selectedHours.length}h, snitt: {avgSelectedPrice?.toFixed(2)} kr/kWh)</span></span>
+              <span className="text-muted-foreground">
+                Manuellt valda timmar ({selectedHours.length}h, snitt: <span className="font-semibold text-foreground">{avgSelectedPrice?.toFixed(2)} kr/kWh</span>)
+              </span>
             </div>
           )}
         </div>
