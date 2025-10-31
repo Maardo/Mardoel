@@ -8,6 +8,7 @@ import {
 import PriceChart from "@/components/PriceChart";
 import PriceHighLowCards from "@/components/PriceHighLowCards";
 import CostCardsSimple from "@/components/CostCardsSimple";
+import RegionSelector, { Region } from "@/components/RegionSelector";
 import { Zap, Info, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ const Index = () => {
     avgPrice: number;
   } | null>(null);
   const [selectedHourWindow, setSelectedHourWindow] = useState<number | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<Region>("SE3");
 
   const currentHour = new Date().getHours();
   
@@ -73,7 +75,7 @@ const Index = () => {
 
   const loadPrices = async () => {
     setLoading(true);
-    const data = await fetchPriceData();
+    const data = await fetchPriceData(selectedRegion);
     setPriceData(data);
     
     // Calculate optimal window for hero section (today only)
@@ -83,10 +85,10 @@ const Index = () => {
     setLoading(false);
   };
 
-  // Initial load
+  // Initial load and reload when region changes
   useEffect(() => {
     loadPrices();
-  }, []);
+  }, [selectedRegion]);
 
   // Auto-refresh every 15 minutes
   useEffect(() => {
@@ -113,26 +115,34 @@ const Index = () => {
       {/* Header */}
       <header className="bg-gradient-hero text-primary-foreground py-4 sm:py-6 shadow-elegant">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Zap className="w-6 h-6 sm:w-8 sm:h-8" />
               <div>
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Elpriser SE3</h1>
+                <div className="flex items-center gap-3 mb-1">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Elpriser {selectedRegion}</h1>
+                </div>
                 <p className="text-xs sm:text-sm text-primary-foreground/90">
                   Aktuella elpriser och smart laddningsplanering
                 </p>
               </div>
             </div>
-            <Button 
-              onClick={loadPrices} 
-              size="sm" 
-              variant="secondary"
-              disabled={loading}
-              className="backdrop-blur-sm hover:scale-105 transition-all duration-300"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Uppdatera</span>
-            </Button>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <RegionSelector 
+                selectedRegion={selectedRegion}
+                onRegionChange={setSelectedRegion}
+              />
+              <Button 
+                onClick={loadPrices} 
+                size="sm" 
+                variant="secondary"
+                disabled={loading}
+                className="backdrop-blur-sm hover:scale-105 transition-all duration-300"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Uppdatera</span>
+              </Button>
+            </div>
           </div>
         </div>
       </header>

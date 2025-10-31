@@ -91,6 +91,16 @@ const PriceChart = ({
         .reduce((sum, p) => sum + p.price, 0) / selectedHours.length / 100
     : null;
 
+  // Calculate time range for manually selected hours
+  const selectedHoursTimeRange = selectedHours.length > 0 
+    ? (() => {
+        const sortedHours = [...selectedHours].sort((a, b) => a - b);
+        const startHour = rollingPrices[sortedHours[0]]?.displayHour;
+        const endHour = rollingPrices[sortedHours[sortedHours.length - 1]]?.displayHour;
+        return `${startHour}-${endHour}`;
+      })()
+    : null;
+
   // Prepare chart data using the actual cheapest 4 consecutive indices
   const chartData = rollingPrices.map((hourData, idx) => ({
     hour: hourData.displayHour,
@@ -102,10 +112,8 @@ const PriceChart = ({
     isNextDay: hourData.isNextDay
   }));
 
-  // Handle bar click
+  // Handle bar click - allow clicking even when preset window is selected
   const handleBarClick = (data: any) => {
-    if (selectedHourWindow) return;
-    
     const hourNum = data.hourNum;
     setSelectedHours(prev => 
       prev.includes(hourNum) 
@@ -232,7 +240,7 @@ const PriceChart = ({
             <div className="flex items-center gap-2 text-[10px] sm:text-xs lg:text-sm">
               <div className="w-3 h-3 rounded bg-chart-selected"></div>
               <span className="text-muted-foreground">
-                Manuellt valda timmar ({selectedHours.length}h, snitt: <span className="font-semibold text-foreground">{avgSelectedPrice?.toFixed(2)} kr/kWh</span>)
+                Manuellt valda timmar {selectedHoursTimeRange} ({selectedHours.length}h): <span className="font-semibold text-foreground">{avgSelectedPrice?.toFixed(2)} kr/kWh</span>
               </span>
             </div>
           )}
@@ -240,8 +248,10 @@ const PriceChart = ({
       </div>
 
 
-      <ResponsiveContainer width="100%" height={250} className="sm:h-[350px] lg:h-[400px]">
-        <BarChart data={chartData} margin={{ top: 50, right: 10, left: 0, bottom: 5 }}>
+      <div className="overflow-x-auto -mx-3 sm:mx-0">
+        <div className="min-w-[600px] sm:min-w-0">
+          <ResponsiveContainer width="100%" height={250} className="sm:h-[350px] lg:h-[400px]">
+            <BarChart data={chartData} margin={{ top: 50, right: 10, left: 0, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
           <XAxis
             dataKey="hour"
@@ -284,8 +294,10 @@ const PriceChart = ({
               />
             ))}
           </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   );
 };

@@ -45,9 +45,11 @@ const aggregateHourlyPrices = (prices: HourlyPrice[]): HourlyPrice[] => {
 };
 
 // Fetch live price data from backend
-export const fetchPriceData = async (): Promise<PriceData> => {
+export const fetchPriceData = async (region: string = "SE3"): Promise<PriceData> => {
   try {
-    const { data, error } = await supabase.functions.invoke('fetch-nordpool-prices');
+    const { data, error } = await supabase.functions.invoke('fetch-nordpool-prices', {
+      body: { region }
+    });
     
     if (error) {
       console.error('Error fetching prices:', error);

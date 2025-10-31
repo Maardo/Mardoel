@@ -25,7 +25,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Fetching electricity prices for SE3...');
+    // Parse request body to get region
+    const { region = 'SE3' } = await req.json().catch(() => ({ region: 'SE3' }));
+    
+    console.log(`Fetching electricity prices for ${region}...`);
 
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
@@ -39,9 +42,9 @@ Deno.serve(async (req) => {
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
     // Using Elpriset Just Nu API - free and reliable for Swedish electricity prices
-    const todayUrl = `https://www.elprisetjustnu.se/api/v1/prices/${todayStr.split('-')[0]}/${todayStr.split('-')[1]}-${todayStr.split('-')[2]}_SE3.json`;
-    const yesterdayUrl = `https://www.elprisetjustnu.se/api/v1/prices/${yesterdayStr.split('-')[0]}/${yesterdayStr.split('-')[1]}-${yesterdayStr.split('-')[2]}_SE3.json`;
-    const tomorrowUrl = `https://www.elprisetjustnu.se/api/v1/prices/${tomorrowStr.split('-')[0]}/${tomorrowStr.split('-')[1]}-${tomorrowStr.split('-')[2]}_SE3.json`;
+    const todayUrl = `https://www.elprisetjustnu.se/api/v1/prices/${todayStr.split('-')[0]}/${todayStr.split('-')[1]}-${todayStr.split('-')[2]}_${region}.json`;
+    const yesterdayUrl = `https://www.elprisetjustnu.se/api/v1/prices/${yesterdayStr.split('-')[0]}/${yesterdayStr.split('-')[1]}-${yesterdayStr.split('-')[2]}_${region}.json`;
+    const tomorrowUrl = `https://www.elprisetjustnu.se/api/v1/prices/${tomorrowStr.split('-')[0]}/${tomorrowStr.split('-')[1]}-${tomorrowStr.split('-')[2]}_${region}.json`;
 
     console.log('Fetching from:', todayUrl);
 
