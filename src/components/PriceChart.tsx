@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Rolling24HourPrice, findCheapestWindow } from "@/utils/priceUtils";
 import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
@@ -31,7 +31,21 @@ const PriceChart = ({
   selectedWindow,
   currentHour
 }: PriceChartProps) => {
-  const [selectedHours, setSelectedHours] = useState<number[]>([]);
+  const [manualSelectedIndices, setManualSelectedIndices] = useState<number[]>([]);
+
+  // Reset manual selection when preset window changes
+  useEffect(() => {
+    if (selectedHourWindow && selectedWindow) {
+      // Initialize with the selected window indices
+      const indices = Array.from(
+        { length: selectedHourWindow },
+        (_, i) => selectedWindow.startIdx + i
+      );
+      setManualSelectedIndices(indices);
+    } else {
+      setManualSelectedIndices([]);
+    }
+  }, [selectedHourWindow, selectedWindow?.startIdx]);
 
   // Calculate the 4 cheapest consecutive hours - match by index in rolling array
   const cheapest4Indices = optimalWindow 
@@ -64,13 +78,17 @@ const PriceChart = ({
     actualCheapest4Indices = [minStartIdx, minStartIdx + 1, minStartIdx + 2, minStartIdx + 3];
   }
 
-  // Calculate selected window indices based on the new index-based structure
-  const selectedWindowIndices = selectedWindow
-    ? Array.from({ length: selectedHourWindow || 0 }, (_, i) => selectedWindow.startIdx + i)
-    : [];
+  // Use manual selection if available, otherwise use preset window
+  const effectiveSelectedIndices = manualSelectedIndices.length > 0 
+    ? manualSelectedIndices 
+    : (selectedWindow ? Array.from({ length: selectedHourWindow || 0 }, (_, i) => selectedWindow.startIdx + i) : []);
   
-  // Calculate average price for selected window
-  const avgSelectedWindow = selectedWindow ? selectedWindow.avgPrice / 100 : null;
+  // Calculate average price for effective selection
+  const avgSelectedWindow = effectiveSelectedIndices.length > 0
+    ? rollingPrices
+        .filter((_, idx) => effectiveSelectedIndices.includes(idx))
+        .reduce((sum, p) => sum + p.price, 0) / effectiveSelectedIndices.length / 100
+    : null;
 
   // Average price for the 4 cheapest consecutive hours - calculate from actual indices
   const avgCheapest4 = actualCheapest4Indices.length === 4
@@ -84,19 +102,12 @@ const PriceChart = ({
     ? rollingPrices.reduce((sum, p) => sum + p.price, 0) / rollingPrices.length / 100
     : 0;
 
-  // Calculate average price for manually selected hours
-  const avgSelectedPrice = selectedHours.length > 0
-    ? rollingPrices
-        .filter((_, idx) => selectedHours.includes(idx))
-        .reduce((sum, p) => sum + p.price, 0) / selectedHours.length / 100
-    : null;
-
-  // Calculate time range for manually selected hours
-  const selectedHoursTimeRange = selectedHours.length > 0 
+  // Calculate time range for selected hours
+  const selectedHoursTimeRange = effectiveSelectedIndices.length > 0 
     ? (() => {
-        const sortedHours = [...selectedHours].sort((a, b) => a - b);
-        const startHour = rollingPrices[sortedHours[0]]?.displayHour;
-        const endHour = rollingPrices[sortedHours[sortedHours.length - 1]]?.displayHour;
+        const sortedIndices = [...effectiveSelectedIndices].sort((a, b) => a - b);
+        const startHour = rollingPrices[sortedIndices[0]]?.displayHour;
+        const endHour = rollingPrices[sortedIndices[sortedIndices.length - 1]]?.displayHour;
         return `${startHour}-${endHour}`;
       })()
     : null;
@@ -107,25 +118,27 @@ const PriceChart = ({
     hourNum: idx,
     pris: hourData.price / 100,
     isCheap: actualCheapest4Indices.includes(idx),
-    isSelectedWindow: selectedWindowIndices.includes(idx),
-    isSelected: selectedHours.includes(idx),
+    isSelected: effectiveSelectedIndices.includes(idx),
     isNextDay: hourData.isNextDay
   }));
 
-  // Handle bar click - allow clicking even when preset window is selected
+  // Handle bar click - toggle selection
   const handleBarClick = (data: any) => {
     const hourNum = data.hourNum;
-    setSelectedHours(prev => 
-      prev.includes(hourNum) 
-        ? prev.filter(h => h !== hourNum)
-        : [...prev, hourNum]
-    );
+    setManualSelectedIndices(prev => {
+      if (prev.includes(hourNum)) {
+        // Remove from selection
+        return prev.filter(h => h !== hourNum);
+      } else {
+        // Add to selection
+        return [...prev, hourNum].sort((a, b) => a - b);
+      }
+    });
   };
 
-  // Get bar color based on status - priority: selected > selectedWindow > cheap > normal
+  // Get bar color based on status - priority: selected > cheap > normal
   const getBarColor = (entry: any) => {
-    if (entry.isSelected) return "hsl(var(--chart-selected))";
-    if (entry.isSelectedWindow) return "hsl(var(--chart-window))";
+    if (entry.isSelected) return "hsl(var(--chart-window))";
     if (entry.isCheap) return "hsl(var(--price-cheap))";
     return "hsl(var(--chart-normal))";
   };
@@ -142,14 +155,11 @@ const PriceChart = ({
           <p className="text-sm font-bold" style={{ color: payload[0].color }}>
             {payload[0].value.toFixed(2)} kr/kWh (inkl. moms)
           </p>
-          {data.isCheap && !data.isSelectedWindow && !data.isSelected && (
+          {data.isCheap && !data.isSelected && (
             <p className="text-xs mt-1 text-price-cheap">✓ Bland de 4 billigaste sammanhängande</p>
           )}
-          {data.isSelectedWindow && !data.isSelected && (
-            <p className="text-xs mt-1 text-chart-window">✓ Valt laddningsfönster</p>
-          )}
           {data.isSelected && (
-            <p className="text-xs mt-1 text-chart-selected">✓ Manuellt vald</p>
+            <p className="text-xs mt-1 text-chart-window">✓ Vald timme</p>
           )}
           <p className="text-xs text-muted-foreground mt-1">Klicka för att välja/avmarkera</p>
         </div>
@@ -200,18 +210,20 @@ const PriceChart = ({
                 onClick={() => {
                   const newValue = selectedHourWindow === hours ? null : hours;
                   onSelectedHourWindowChange?.(newValue);
-                  setSelectedHours([]);
                 }}
                 className="h-8 px-3 text-xs font-semibold transition-all duration-300"
               >
                 {hours} timmar
               </Button>
             ))}
-            {selectedHours.length > 0 && (
+            {manualSelectedIndices.length > 0 && (
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setSelectedHours([])}
+                onClick={() => {
+                  setManualSelectedIndices([]);
+                  onSelectedHourWindowChange?.(null);
+                }}
                 className="h-8 px-3 text-xs font-semibold border-muted-foreground/30 hover:bg-destructive/10 hover:border-destructive/50"
               >
                 Rensa
@@ -228,19 +240,11 @@ const PriceChart = ({
             <div className="w-3 h-3 rounded bg-price-cheap"></div>
             <span className="text-muted-foreground">4 billigaste sammanhängande: <span className="font-semibold text-foreground">{avgCheapest4.toFixed(2)} kr/kWh</span></span>
           </div>
-          {selectedWindow && avgSelectedWindow && (
+          {effectiveSelectedIndices.length > 0 && avgSelectedWindow && (
             <div className="flex items-center gap-2 text-[10px] sm:text-xs lg:text-sm">
               <div className="w-3 h-3 rounded bg-chart-window"></div>
               <span className="text-muted-foreground">
-                Valt laddningsfönster {rollingPrices[selectedWindow.startIdx]?.displayHour}-{rollingPrices[selectedWindow.endIdx]?.displayHour} ({selectedHourWindow}h): <span className="font-semibold text-foreground">{avgSelectedWindow.toFixed(2)} kr/kWh</span>
-              </span>
-            </div>
-          )}
-          {selectedHours.length > 0 && (
-            <div className="flex items-center gap-2 text-[10px] sm:text-xs lg:text-sm">
-              <div className="w-3 h-3 rounded bg-chart-selected"></div>
-              <span className="text-muted-foreground">
-                Manuellt valda timmar {selectedHoursTimeRange} ({selectedHours.length}h): <span className="font-semibold text-foreground">{avgSelectedPrice?.toFixed(2)} kr/kWh</span>
+                Valt laddningsfönster {selectedHoursTimeRange} ({effectiveSelectedIndices.length}h): <span className="font-semibold text-foreground">{avgSelectedWindow.toFixed(2)} kr/kWh</span>
               </span>
             </div>
           )}
@@ -248,9 +252,8 @@ const PriceChart = ({
       </div>
 
 
-      <div className="overflow-x-auto -mx-3 sm:mx-0">
-        <div className="min-w-[600px] sm:min-w-0">
-          <ResponsiveContainer width="100%" height={250} className="sm:h-[350px] lg:h-[400px]">
+      <div>
+          <ResponsiveContainer width="100%" height={300} className="sm:h-[350px] lg:h-[400px]">
             <BarChart data={chartData} margin={{ top: 50, right: 10, left: 0, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
           <XAxis
@@ -296,7 +299,6 @@ const PriceChart = ({
           </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
       </div>
     </div>
   );

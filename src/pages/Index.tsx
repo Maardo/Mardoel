@@ -113,35 +113,41 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-gradient-hero text-primary-foreground py-4 sm:py-6 shadow-elegant">
+      <header className="bg-gradient-hero text-primary-foreground py-6 sm:py-8 shadow-elegant border-b-2 border-primary/20">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Zap className="w-6 h-6 sm:w-8 sm:h-8" />
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Elpriser {selectedRegion}</h1>
+          <div className="flex flex-col gap-4">
+            {/* Top row with title and buttons */}
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                  <Zap className="w-6 h-6 sm:w-8 sm:h-8" />
                 </div>
-                <p className="text-xs sm:text-sm text-primary-foreground/90">
-                  Aktuella elpriser och smart laddningsplanering
-                </p>
+                <div>
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Elpriser Sverige</h1>
+                  <p className="text-xs sm:text-sm text-primary-foreground/80">
+                    Live spotpriser och smart laddning
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <RegionSelector 
-                selectedRegion={selectedRegion}
-                onRegionChange={setSelectedRegion}
-              />
               <Button 
                 onClick={loadPrices} 
                 size="sm" 
                 variant="secondary"
                 disabled={loading}
-                className="backdrop-blur-sm hover:scale-105 transition-all duration-300"
+                className="backdrop-blur-sm hover:scale-105 transition-all duration-300 shadow-lg"
               >
-                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-4 h-4 sm:mr-2 ${loading ? 'animate-spin' : ''}`} />
                 <span className="hidden sm:inline">Uppdatera</span>
               </Button>
+            </div>
+            
+            {/* Region selector row */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-primary-foreground/80 font-medium">Välj elområde:</span>
+              <RegionSelector 
+                selectedRegion={selectedRegion}
+                onRegionChange={setSelectedRegion}
+              />
             </div>
           </div>
         </div>
