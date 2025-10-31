@@ -253,6 +253,9 @@ const PriceChart = ({
 
 
       <div>
+          {/* Mobile label above chart */}
+          <div className="block sm:hidden mb-2 text-xs text-muted-foreground font-medium">kr/kWh</div>
+          
           <ResponsiveContainer width="100%" height={300} className="sm:h-[350px] lg:h-[400px]">
             <BarChart data={chartData} margin={{ top: 50, right: 10, left: 0, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
@@ -274,6 +277,7 @@ const PriceChart = ({
               angle: -90,
               position: "insideLeft",
               style: { fontSize: 11, fill: "hsl(var(--muted-foreground))" },
+              className: "hidden sm:block"
             }}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: "hsl(var(--accent) / 0.2)" }} />
