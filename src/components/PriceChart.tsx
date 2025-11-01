@@ -252,12 +252,13 @@ const PriceChart = ({
       </div>
 
 
-      <div>
+      <div className="w-full flex flex-col items-center">
           {/* Mobile label above chart */}
-          <div className="block sm:hidden mb-2 text-xs text-muted-foreground font-medium">kr/kWh</div>
+          <div className="block sm:hidden mb-2 text-xs text-muted-foreground font-medium text-center">kr/kWh</div>
           
-          <ResponsiveContainer width="100%" height={300} className="sm:h-[350px] lg:h-[400px]">
-            <BarChart data={chartData} margin={{ top: 50, right: 10, left: 0, bottom: 5 }}>
+          <div className="w-full max-w-full">
+            <ResponsiveContainer width="100%" height={300} className="sm:h-[350px] lg:h-[400px]">
+              <BarChart data={chartData} margin={{ top: 50, right: 15, left: -20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
           <XAxis
             dataKey="hour"
@@ -301,8 +302,9 @@ const PriceChart = ({
               />
             ))}
           </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
       </div>
     </div>
   );
