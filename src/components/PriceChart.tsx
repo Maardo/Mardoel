@@ -143,6 +143,17 @@ const PriceChart = ({
     return "hsl(var(--chart-normal))";
   };
 
+  // Get bar stroke for better visibility
+  const getBarStroke = (entry: any) => {
+    if (entry.isSelected) return "hsl(var(--foreground))";
+    return "none";
+  };
+
+  const getBarStrokeWidth = (entry: any) => {
+    if (entry.isSelected) return 3;
+    return 0;
+  };
+
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -299,6 +310,8 @@ const PriceChart = ({
               <Cell
                 key={`cell-${index}`}
                 fill={getBarColor(entry)}
+                stroke={getBarStroke(entry)}
+                strokeWidth={getBarStrokeWidth(entry)}
               />
             ))}
           </Bar>
