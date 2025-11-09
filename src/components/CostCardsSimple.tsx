@@ -156,7 +156,7 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {selectedCategory && <selectedCategory.icon className="w-5 h-5 text-primary" />}
@@ -168,37 +168,37 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
           </DialogHeader>
           
           {selectedCategory && getRecommendedTime() && (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {/* Recommended Time Section */}
               <div>
-                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                  <TrendingDown className="w-4 h-4" />
+                <h3 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3 flex items-center gap-2">
+                  <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
                   Rekommenderad tid (billigast)
                 </h3>
-                <div className="space-y-3">
-                  <div className="bg-card rounded-lg p-4 border border-border">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Clock className="w-4 h-4 text-muted-foreground" />
-                      <p className="text-sm font-medium text-muted-foreground">Bästa tid</p>
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="bg-card rounded-lg p-3 sm:p-4 border border-border">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                      <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground">Bästa tid</p>
                     </div>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-lg sm:text-2xl font-bold text-foreground">
                       {getRecommendedTime()?.timeRange}
                     </p>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
                       {selectedCategory.hours} {selectedCategory.hours === 1 ? 'timme' : 'timmar'}
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-card rounded-lg p-3 border border-border">
-                      <p className="text-xs font-medium text-muted-foreground mb-1">Pris</p>
-                      <p className="text-lg font-bold text-foreground">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div className="bg-card rounded-lg p-2 sm:p-3 border border-border">
+                      <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">Pris</p>
+                      <p className="text-sm sm:text-lg font-bold text-foreground">
                         {formatPrice(getRecommendedTime()!.price)}
                       </p>
                     </div>
-                    <div className="bg-price-cheap rounded-lg p-3">
-                      <p className="text-xs font-semibold text-price-cheap-foreground mb-1">Besparing</p>
-                      <p className="text-lg font-bold text-price-cheap-foreground">
+                    <div className="bg-price-cheap rounded-lg p-2 sm:p-3">
+                      <p className="text-[10px] sm:text-xs font-semibold text-price-cheap-foreground mb-0.5 sm:mb-1">Besparing</p>
+                      <p className="text-sm sm:text-lg font-bold text-price-cheap-foreground">
                         {getRecommendedTime()!.savings.toFixed(2)} kr
                       </p>
                     </div>
@@ -210,13 +210,13 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
 
               {/* Custom Time Selection Section */}
               <div>
-                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                  <Settings className="w-4 h-4" />
+                <h3 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3 flex items-center gap-2">
+                  <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
                   Välj egen tid
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div>
-                    <Label htmlFor="kwh-slider" className="text-sm font-medium mb-2 block">
+                    <Label htmlFor="kwh-slider" className="text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 block">
                       Förbrukning: {customKwh} kWh
                     </Label>
                     <Slider
@@ -231,7 +231,7 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
                   </div>
 
                   <div>
-                    <Label htmlFor="start-hour-slider" className="text-sm font-medium mb-2 block">
+                    <Label htmlFor="start-hour-slider" className="text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 block">
                       Starttid: {rollingPrices[customStartHour]?.displayHour}
                     </Label>
                     <Slider
@@ -246,7 +246,7 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
                   </div>
 
                   <div>
-                    <Label htmlFor="duration-slider" className="text-sm font-medium mb-2 block">
+                    <Label htmlFor="duration-slider" className="text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 block">
                       Varaktighet: {customDuration} {customDuration === 1 ? 'timme' : 'timmar'}
                     </Label>
                     <Slider
@@ -261,31 +261,31 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
                   </div>
 
                   {calculateCustomCost() && (
-                    <div className="bg-muted/50 rounded-lg p-4 border border-border">
-                      <div className="space-y-2">
+                    <div className="bg-muted/50 rounded-lg p-3 sm:p-4 border border-border">
+                      <div className="space-y-1.5 sm:space-y-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">Tid:</span>
-                          <span className="text-sm font-semibold">
+                          <span className="text-xs sm:text-sm text-muted-foreground">Tid:</span>
+                          <span className="text-xs sm:text-sm font-semibold">
                             {calculateCustomCost()!.startHour} - {calculateCustomCost()!.endHour}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">Genomsnittspris:</span>
-                          <span className="text-sm font-semibold">
+                          <span className="text-xs sm:text-sm text-muted-foreground">Genomsnittspris:</span>
+                          <span className="text-xs sm:text-sm font-semibold">
                             {formatPrice(calculateCustomCost()!.avgPrice)}
                           </span>
                         </div>
                         <Separator />
                         <div className="flex justify-between items-center">
-                          <span className="text-base font-semibold">Total kostnad:</span>
-                          <span className="text-xl font-bold text-primary">
+                          <span className="text-sm sm:text-base font-semibold">Total kostnad:</span>
+                          <span className="text-lg sm:text-xl font-bold text-primary">
                             {calculateCustomCost()!.cost} kr
                           </span>
                         </div>
                         {calculateCustomCost()!.savings > 0 && (
                           <div className="flex justify-between items-center text-price-cheap-foreground">
-                            <span className="text-sm">Besparing:</span>
-                            <span className="text-sm font-semibold">
+                            <span className="text-xs sm:text-sm">Besparing:</span>
+                            <span className="text-xs sm:text-sm font-semibold">
                               {calculateCustomCost()!.savings.toFixed(2)} kr
                             </span>
                           </div>
@@ -296,7 +296,7 @@ const CostCardsSimple = ({ prices, rollingPrices }: CostCardsSimpleProps) => {
                 </div>
               </div>
 
-              <div className="text-xs text-muted-foreground bg-muted/50 rounded p-3">
+              <div className="text-[10px] sm:text-xs text-muted-foreground bg-muted/50 rounded p-2 sm:p-3">
                 <p>
                   Välj förbrukning, starttid och varaktighet för att se din beräknade kostnad.
                 </p>
