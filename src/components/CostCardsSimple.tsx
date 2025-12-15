@@ -131,7 +131,7 @@ const CostCardsSimple = ({
                   </h3>
                 </div>
                 <div className="text-center">
-                  <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">
+                  <p className="text-[10px] sm:text-xs mb-0.5 sm:mb-1 text-secondary-foreground">
                     ({category.kWhRange[0]} - {category.kWhRange[1]} kWh)
                   </p>
                   <p className="text-sm sm:text-base lg:text-lg font-bold text-foreground">
