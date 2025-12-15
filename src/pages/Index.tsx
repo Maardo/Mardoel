@@ -112,7 +112,7 @@ const Index = () => {
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Elpriser Sverige</h1>
                   <p className="text-xs sm:text-sm text-primary-foreground/80">
                     Live spotpriser och smart laddning
-                    {settings.showRealCost && <span className="ml-2 text-primary-foreground/60">​(Lägg till tilläg i inställningar)      </span>}
+                    {settings.showRealCost}
                   </p>
                 </div>
               </div>
