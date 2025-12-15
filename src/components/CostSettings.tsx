@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Settings } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -39,8 +39,9 @@ const CostSettings = ({
   return <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2 text-secondary-foreground">
-          <Settings className="w-4 h-4" />
-          <span className="hidden sm:inline">Din elnätsavgift </span>
+          <TrendingUp className="w-4 h-4" />
+          <span className="hidden sm:inline">Nätavgift / Elhandlarpåslag
+ </span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
