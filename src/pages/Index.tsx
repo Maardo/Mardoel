@@ -116,7 +116,7 @@ const Index = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col items-end gap-2">
                 <CostSettings settings={settings} onSettingsChange={setSettings} />
                 <Button onClick={() => refetch()} size="sm" variant="secondary" disabled={loading} className="backdrop-blur-sm hover:scale-105 transition-all duration-300 shadow-lg">
                   <RefreshCw className={`w-4 h-4 sm:mr-2 ${loading ? 'animate-spin' : ''}`} />
