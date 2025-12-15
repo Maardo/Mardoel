@@ -1,39 +1,49 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
-  fetchPriceData,
   findCheapestWindow,
-  PriceData,
   createRolling24HourView,
 } from "@/utils/priceUtils";
 import PriceChart from "@/components/PriceChart";
 import PriceHighLowCards from "@/components/PriceHighLowCards";
 import CostCardsSimple from "@/components/CostCardsSimple";
 import RegionSelector, { Region } from "@/components/RegionSelector";
-import { Zap, Info, RefreshCw } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import CostSettings from "@/components/CostSettings";
+import { Zap, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { usePriceData } from "@/hooks/usePriceData";
+import { useCostSettings } from "@/hooks/useCostSettings";
 
 const Index = () => {
-  const [priceData, setPriceData] = useState<PriceData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [optimalWindow, setOptimalWindow] = useState<{
-    startHour: number;
-    endHour: number;
-    avgPrice: number;
-  } | null>(null);
+  const [selectedRegion, setSelectedRegion] = useLocalStorage<Region>("elpriser-region", "SE3");
   const [selectedHourWindow, setSelectedHourWindow] = useState<number | null>(null);
-  const [selectedRegion, setSelectedRegion] = useState<Region>("SE3");
+  
+  const { data: priceData, isLoading, refetch, isRefetching } = usePriceData(selectedRegion);
+  const { settings, setSettings, calculateRealPrice } = useCostSettings();
 
   const currentHour = new Date().getHours();
   
-  // Create rolling 24-hour view
-  const rolling24Hours = priceData 
-    ? createRolling24HourView(priceData.today, priceData.tomorrow, currentHour)
-    : [];
+  // Memoized rolling 24-hour view with real cost calculation
+  const rolling24Hours = useMemo(() => {
+    if (!priceData) return [];
+    const rolling = createRolling24HourView(priceData.today, priceData.tomorrow, currentHour);
+    return settings.showRealCost 
+      ? rolling.map(p => ({ ...p, price: calculateRealPrice(p.price) }))
+      : rolling;
+  }, [priceData, currentHour, settings.showRealCost, calculateRealPrice]);
 
-  // Calculate optimal window for the rolling view (using index-based calculation)
-  let cheapest4Window: { startIdx: number; endIdx: number; avgPrice: number } | null = null;
-  if (rolling24Hours.length >= 4) {
+  // Memoized today prices with real cost
+  const adjustedTodayPrices = useMemo(() => {
+    if (!priceData) return [];
+    return settings.showRealCost
+      ? priceData.today.map(p => ({ ...p, price: calculateRealPrice(p.price) }))
+      : priceData.today;
+  }, [priceData, settings.showRealCost, calculateRealPrice]);
+
+  // Memoized cheapest 4-hour window calculation
+  const cheapest4Window = useMemo(() => {
+    if (rolling24Hours.length < 4) return null;
+    
     let minSum = Infinity;
     let minStartIdx = 0;
     
@@ -45,16 +55,17 @@ const Index = () => {
       }
     }
     
-    cheapest4Window = {
+    return {
       startIdx: minStartIdx,
       endIdx: minStartIdx + 3,
       avgPrice: Math.round(minSum / 4)
     };
-  }
+  }, [rolling24Hours]);
 
-  // Calculate selected window - find cheapest consecutive hours by index in rolling array
-  let selectedWindow: { startIdx: number; endIdx: number; avgPrice: number } | null = null;
-  if (selectedHourWindow && rolling24Hours.length >= selectedHourWindow) {
+  // Memoized selected window calculation
+  const selectedWindow = useMemo(() => {
+    if (!selectedHourWindow || rolling24Hours.length < selectedHourWindow) return null;
+    
     let minSum = Infinity;
     let minStartIdx = 0;
     
@@ -66,40 +77,22 @@ const Index = () => {
       }
     }
     
-    selectedWindow = {
+    return {
       startIdx: minStartIdx,
       endIdx: minStartIdx + selectedHourWindow - 1,
       avgPrice: Math.round(minSum / selectedHourWindow)
     };
-  }
+  }, [rolling24Hours, selectedHourWindow]);
 
-  const loadPrices = async () => {
-    setLoading(true);
-    const data = await fetchPriceData(selectedRegion);
-    setPriceData(data);
-    
-    // Calculate optimal window for hero section (today only)
-    const todayOptimal = findCheapestWindow(data.today, 4);
-    setOptimalWindow(todayOptimal);
-    
-    setLoading(false);
-  };
+  // Memoized optimal window for today
+  const optimalWindow = useMemo(() => {
+    if (!priceData) return null;
+    return findCheapestWindow(adjustedTodayPrices, 4);
+  }, [priceData, adjustedTodayPrices]);
 
-  // Initial load and reload when region changes
-  useEffect(() => {
-    loadPrices();
-  }, [selectedRegion]);
+  const loading = isLoading || isRefetching;
 
-  // Auto-refresh every 15 minutes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      loadPrices();
-    }, 900000); // 15 minutes
-
-    return () => clearInterval(interval);
-  }, []);
-
-  if (loading || !priceData) {
+  if (isLoading || !priceData) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -126,19 +119,28 @@ const Index = () => {
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Elpriser Sverige</h1>
                   <p className="text-xs sm:text-sm text-primary-foreground/80">
                     Live spotpriser och smart laddning
+                    {settings.showRealCost && (
+                      <span className="ml-2 text-primary-foreground/60">(inkl. tillägg)</span>
+                    )}
                   </p>
                 </div>
               </div>
-              <Button 
-                onClick={loadPrices} 
-                size="sm" 
-                variant="secondary"
-                disabled={loading}
-                className="backdrop-blur-sm hover:scale-105 transition-all duration-300 shadow-lg"
-              >
-                <RefreshCw className={`w-4 h-4 sm:mr-2 ${loading ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">Uppdatera</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <CostSettings 
+                  settings={settings}
+                  onSettingsChange={setSettings}
+                />
+                <Button 
+                  onClick={() => refetch()} 
+                  size="sm" 
+                  variant="secondary"
+                  disabled={loading}
+                  className="backdrop-blur-sm hover:scale-105 transition-all duration-300 shadow-lg"
+                >
+                  <RefreshCw className={`w-4 h-4 sm:mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  <span className="hidden sm:inline">Uppdatera</span>
+                </Button>
+              </div>
             </div>
             
             {/* Region selector row */}
@@ -157,14 +159,14 @@ const Index = () => {
       <main className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 lg:py-8">
         {/* High/Low Price Cards */}
         <PriceHighLowCards 
-          prices={priceData.today} 
+          prices={adjustedTodayPrices} 
           cheapest4Window={cheapest4Window}
           rollingPrices={rolling24Hours}
         />
 
         {/* Cost Cards */}
         <CostCardsSimple 
-          prices={priceData.today} 
+          prices={adjustedTodayPrices} 
           rollingPrices={rolling24Hours}
         />
 
