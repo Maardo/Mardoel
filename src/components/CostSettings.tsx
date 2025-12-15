@@ -40,7 +40,7 @@ const CostSettings = ({
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2 text-secondary-foreground">
           <Settings className="w-4 h-4" />
-          <span className="hidden sm:inline">Inställningar</span>
+          <span className="hidden sm:inline">Din elnätsavgift </span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
